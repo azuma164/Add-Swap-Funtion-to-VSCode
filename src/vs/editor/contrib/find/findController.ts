@@ -367,9 +367,7 @@ export class CommonFindController extends Disposable implements IEditorContribut
 
 	public replaceAll(): boolean {
 		if (this._model) {
-			//変更
-			this._model.swapAll();
-			//this._model.replaceALl();
+			this._model.replaceAll();
 			return true;
 		}
 		return false;
@@ -931,3 +929,16 @@ registerEditorCommand(new FindCommand({
 		primary: KeyMod.Alt | KeyCode.Enter
 	}
 }));
+
+//変更開始
+registerEditorCommand(new FindCommand({
+	id: FIND_IDS.SwapAllAction,
+	precondition: CONTEXT_FIND_WIDGET_VISIBLE,
+	handler: x => x.swapAll(),
+	kbOpts: {
+		weight: KeybindingWeight.EditorContrib + 5,
+		kbExpr: EditorContextKeys.focus,
+		primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.Enter
+	}
+}));
+//変更終了
