@@ -21,6 +21,9 @@ import { SearchParams } from 'vs/editor/common/model/textModelSearch';
 import { FindDecorations } from 'vs/editor/contrib/find/findDecorations';
 import { FindReplaceState, FindReplaceStateChangedEvent } from 'vs/editor/contrib/find/findState';
 import { ReplaceAllCommand } from 'vs/editor/contrib/find/replaceAllCommand';
+// 変更開始
+import { SwapAllCommand } from 'vs/editor/contrib/find/swapAllCommand';
+// 変更終了
 import { parseReplaceString, ReplacePattern } from 'vs/editor/contrib/find/replacePattern';
 import { RawContextKey } from 'vs/platform/contextkey/common/contextkey';
 import { IKeybindings } from 'vs/platform/keybinding/common/keybindingsRegistry';
@@ -645,16 +648,17 @@ export class FindModelBoundToEditorModel {
 		//swap用に作ったやつ
 		let matches2 = this._findMatchesForSwap(findScopes, replacePattern.hasReplacementPatterns || this._state.preserveCase, Constants.MAX_SAFE_SMALL_INTEGER);
 
-		let swapStrings: string[] = [];
-		for (let i = 0, len = matches1.length + matches2.length; i < len; i++) {
-			if (i < matches1.length) {
-				swapStrings[i] = replacePattern.buildReplaceString(matches1[i].matches, this._state.preserveCase);
-			} else {
-				swapStrings[i] = swapPattern.buildReplaceString(matches2[i - matches1.length].matches, this._state.preserveCase);
-			}
+		let swapStrings1: string[] = [];
+		for (let i = 0, len = matches1.length; i < len; i++) {
+			swapStrings1[i] = replacePattern.buildReplaceString(matches1[i].matches, this._state.preserveCase);
 		}
 
-		let command = new ReplaceAllCommand(this._editor.getSelection(), matches1.map(m => m.range).concat(matches2.map(m => m.range)), swapStrings);
+		let swapStrings2: string[] = [];
+		for (let i = 0, len = matches2.length; i < len; i++) {
+			swapStrings2[i] = swapPattern.buildReplaceString(matches2[i].matches, this._state.preserveCase);
+		}
+		//let command = new ReplaceAllCommand(this._editor.getSelection(), matches1.map(m => m.range).concat(matches2.map(m => m.range)), swapStrings);
+		let command = new SwapAllCommand(this._editor.getSelection(), matches1.map(m => m.range), swapStrings1, matches2.map(m => m.range), swapStrings2);
 		this._executeEditorCommand('replaceAll', command);
 	}
 	//変更終了
