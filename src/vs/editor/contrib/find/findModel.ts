@@ -662,7 +662,9 @@ export class FindModelBoundToEditorModel {
 		}
 		//let command = new ReplaceAllCommand(this._editor.getSelection(), matches1.map(m => m.range).concat(matches2.map(m => m.range)), swapStrings);
 		let command = new SwapAllCommand(this._editor.getSelection(), matches1.map(m => m.range), swapStrings1, matches2.map(m => m.range), swapStrings2);
-		this._executeEditorCommand('replaceAll', command);
+		// 変更開始
+		this._executeEditorCommand('swapAll', command);
+		// 変更終了
 	}
 	//変更終了
 

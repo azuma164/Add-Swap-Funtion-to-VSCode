@@ -52,6 +52,9 @@ export const findNextMatchIcon = registerIcon('find-next-match', Codicon.arrowDo
 export interface IFindController {
 	replace(): void;
 	replaceAll(): void;
+	// 変更開始
+	swapAll(): void;
+	// 変更終了
 	getGlobalBufferTerm(): Promise<string>;
 }
 
@@ -137,6 +140,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _closeBtn!: SimpleButton;
 	private _replaceBtn!: SimpleButton;
 	private _replaceAllBtn!: SimpleButton;
+	//変更開始
+	private _swapAllBtn!: SimpleButton;
+	//変更終了
 
 	private _isVisible: boolean;
 	private _isReplaceVisible: boolean;
@@ -1174,6 +1180,15 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				this._controller.replaceAll();
 			}
 		}));
+		// 変更開始
+		this._swapAllBtn = this._register(new SimpleButton({
+			label: NLS_REPLACE_ALL_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.SwapAllAction),
+			icon: findReplaceAllIcon,
+			onTrigger: () => {
+				this._controller.swapAll();
+			}
+		}));
+		// 変更終了
 
 		let replacePart = document.createElement('div');
 		replacePart.className = 'replace-part';
@@ -1185,6 +1200,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		replaceActionsContainer.appendChild(this._replaceBtn.domNode);
 		replaceActionsContainer.appendChild(this._replaceAllBtn.domNode);
+		// 変更開始
+		replaceActionsContainer.appendChild(this._swapAllBtn.domNode);
+		// 変更終了
 
 		// Toggle replace button
 		this._toggleReplaceBtn = this._register(new SimpleButton({
