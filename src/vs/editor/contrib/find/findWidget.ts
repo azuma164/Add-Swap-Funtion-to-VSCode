@@ -68,6 +68,9 @@ const NLS_REPLACE_INPUT_LABEL = nls.localize('label.replace', "Replace");
 const NLS_REPLACE_INPUT_PLACEHOLDER = nls.localize('placeholder.replace', "Replace");
 const NLS_REPLACE_BTN_LABEL = nls.localize('label.replaceButton', "Replace");
 const NLS_REPLACE_ALL_BTN_LABEL = nls.localize('label.replaceAllButton', "Replace All");
+// 変更開始
+const NLS_SWAP_ALL_BTN_LABEL = nls.localize('label.swapAllButton', "Swap All");
+// 変更終了
 const NLS_TOGGLE_REPLACE_MODE_BTN_LABEL = nls.localize('label.toggleReplaceButton', "Toggle Replace");
 const NLS_MATCHES_COUNT_LIMIT_TITLE = nls.localize('title.matchesCountLimit', "Only the first {0} results are highlighted, but all find operations work on the entire text.", MATCHES_LIMIT);
 export const NLS_MATCHES_LOCATION = nls.localize('label.matchesLocation', "{0} of {1}");
@@ -1182,7 +1185,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}));
 		// 変更開始
 		this._swapAllBtn = this._register(new SimpleButton({
-			label: NLS_REPLACE_ALL_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.SwapAllAction),
+			label: NLS_SWAP_ALL_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.SwapAllAction),
 			icon: findReplaceAllIcon,
 			onTrigger: () => {
 				this._controller.swapAll();
