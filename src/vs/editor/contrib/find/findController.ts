@@ -367,11 +367,23 @@ export class CommonFindController extends Disposable implements IEditorContribut
 
 	public replaceAll(): boolean {
 		if (this._model) {
-			this._model.replaceAll();
+			//変更
+			this._model.swapAll();
+			//this._model.replaceALl();
 			return true;
 		}
 		return false;
 	}
+
+	//変更開始
+	public swapAll(): boolean {
+		if (this._model) {
+			this._model.swapAll();
+			return true;
+		}
+		return false;
+	}
+	//変更終わり
 
 	public selectAllMatches(): boolean {
 		if (this._model) {
