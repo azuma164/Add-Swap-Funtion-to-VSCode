@@ -137,6 +137,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _cachedHeight: number | null = null;
 	private _findInput!: FindInput;
 	private _replaceInput!: ReplaceInput;
+	// 仮変更開始
+	private _swapInput!: ReplaceInput;
+	// 仮変更終了
 
 	private _toggleReplaceBtn!: SimpleButton;
 	private _matchesCount!: HTMLElement;
@@ -338,8 +341,14 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				if (!this._codeEditor.getOption(EditorOption.readOnly) && !this._isReplaceVisible) {
 					this._isReplaceVisible = true;
 					this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
+					// 仮変更開始
+					this._swapInput.width = dom.getTotalWidth(this._swapInput.domNode);
+					// 仮変更終了
 					this._updateButtons();
 					this._replaceInput.inputBox.layout();
+					// 仮変更開始
+					this._swapInput.inputBox.layout();
+					// 仮変更終了
 				}
 			} else {
 				if (this._isReplaceVisible) {
@@ -480,6 +489,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _updateButtons(): void {
 		this._findInput.setEnabled(this._isVisible);
 		this._replaceInput.setEnabled(this._isVisible && this._isReplaceVisible);
+		// 仮変更開始
+		this._swapInput.setEnabled(this._isVisible && this._isReplaceVisible);
+		// 仮変更終了
 		this._updateToggleSelectionFindButton();
 		this._closeBtn.setEnabled(this._isVisible);
 
@@ -489,6 +501,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._nextBtn.setEnabled(this._isVisible && findInputIsNonEmpty && matchesCount && this._state.canNavigateForward());
 		this._replaceBtn.setEnabled(this._isVisible && this._isReplaceVisible && findInputIsNonEmpty);
 		this._replaceAllBtn.setEnabled(this._isVisible && this._isReplaceVisible && findInputIsNonEmpty);
+		// 変更開始(2021/10/19)
+		this._swapAllBtn.setEnabled(this._isVisible && this._isReplaceVisible && findInputIsNonEmpty && !this._state.isRegex);
+		// 変更終了(2021/10/19)
 
 		this._domNode.classList.toggle('replaceToggled', this._isReplaceVisible);
 		this._toggleReplaceBtn.setExpanded(this._isReplaceVisible);
@@ -705,6 +720,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		};
 		this._findInput.style(inputStyles);
 		this._replaceInput.style(inputStyles);
+		// 仮変更開始
+		this._swapInput.style(inputStyles);
+		// 仮変更終了
 		this._toggleSelectionFind.style(inputStyles);
 	}
 
@@ -741,6 +759,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				// as the widget is resized by users, we may need to change the max width of the widget as the editor width changes.
 				this._domNode.style.maxWidth = `${editorWidth - 28 - minimapWidth - 15}px`;
 				this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
+				// 仮変更開始
+				this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
+				// 仮変更終了
 				return;
 			}
 		}
@@ -768,9 +789,15 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			let findInputWidth = this._findInput.inputBox.element.clientWidth;
 			if (findInputWidth > 0) {
 				this._replaceInput.width = findInputWidth;
+				// 仮変更開始
+				this._swapInput.width = findInputWidth;
+				// 仮変更終了
 			}
 		} else if (this._isReplaceVisible) {
 			this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
+			// 仮変更開始
+			this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
+			// 仮変更終了
 		}
 	}
 
@@ -789,7 +816,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 			totalheight += this._replaceInput.inputBox.height + 2 /** input box border */;
 		}
-
+		// 仮変更開始
+		totalheight += this._swapInput.inputBox.height + 2;
+		// 仮変更終了
 		// margin bottom
 		totalheight += 4;
 		return totalheight;
@@ -1209,7 +1238,52 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		// 変更開始
 		replaceActionsContainer.appendChild(this._swapAllBtn.domNode);
 		// 変更終了
+		// 仮変更開始
+		this._swapInput = this._register(new ContextScopedReplaceInput(null, undefined, {
+			label: NLS_REPLACE_INPUT_LABEL,
+			placeholder: NLS_REPLACE_INPUT_PLACEHOLDER,
+			appendPreserveCaseLabel: this._keybindingLabelFor(FIND_IDS.TogglePreserveCaseCommand),
+			history: [],
+			flexibleHeight,
+			flexibleWidth,
+			flexibleMaxHeight: 118,
+			showHistoryHint: () => showHistoryKeybindingHint(this._keybindingService)
+		}, this._contextKeyService, true));
+		this._swapInput.setPreserveCase(!!this._state.preserveCase);
+		this._register(this._swapInput.onKeyDown((e) => this._onReplaceInputKeyDown(e)));
+		this._register(this._swapInput.inputBox.onDidChange(() => {
+			this._state.change({ replaceString: this._swapInput.inputBox.value }, false);
+		}));
+		this._register(this._swapInput.inputBox.onDidHeightChange((e) => {
+			if (this._isReplaceVisible && this._tryUpdateHeight()) {
+				this._showViewZone();
+			}
+		}));
+		this._register(this._swapInput.onDidOptionChange(() => {
+			this._state.change({
+				preserveCase: this._swapInput.getPreserveCase()
+			}, true);
+		}));
+		this._register(this._swapInput.onPreserveCaseKeyDown((e) => {
+			if (e.equals(KeyCode.Tab)) {
+				if (this._prevBtn.isEnabled()) {
+					this._prevBtn.focus();
+				} else if (this._nextBtn.isEnabled()) {
+					this._nextBtn.focus();
+				} else if (this._toggleSelectionFind.enabled) {
+					this._toggleSelectionFind.focus();
+				} else if (this._closeBtn.isEnabled()) {
+					this._closeBtn.focus();
+				}
 
+				e.preventDefault();
+			}
+		}));
+
+		let swapPart = document.createElement('div');
+		swapPart.className = 'swap-part';
+		swapPart.appendChild(this._swapInput.domNode);
+		// 仮変更終了
 		// Toggle replace button
 		this._toggleReplaceBtn = this._register(new SimpleButton({
 			label: NLS_TOGGLE_REPLACE_MODE_BTN_LABEL,
@@ -1219,6 +1293,10 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				if (this._isReplaceVisible) {
 					this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
 					this._replaceInput.inputBox.layout();
+					// 仮変更開始
+					this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
+					this._swapInput.inputBox.layout();
+					// 仮変更終了
 				}
 				this._showViewZone();
 			}
@@ -1235,6 +1313,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._domNode.appendChild(this._toggleReplaceBtn.domNode);
 		this._domNode.appendChild(findPart);
 		this._domNode.appendChild(replacePart);
+		// 仮変更開始
+		this._domNode.appendChild(swapPart);
+		// 仮変更終了
 
 		this._resizeSash = new Sash(this._domNode, this, { orientation: Orientation.VERTICAL, size: 2 });
 		this._resized = false;
