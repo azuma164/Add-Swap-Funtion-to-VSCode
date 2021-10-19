@@ -584,8 +584,41 @@ export class FindModelBoundToEditorModel {
 		this._executeEditorCommand('replaceAll', command);
 	}
 
+	// //変更開始
+	// public swap(): void {
+	// 	if (!this._hasMatches()) {
+	// 		return;
+	// 	}
+
+	// 	let replacePattern = this._getReplacePattern();
+	// 	let swapPattern = this._getSwapPattern();
+
+	// 	let selection = this._editor.getSelection();
+	// 	let nextMatch = this._getNextMatch(selection.getStartPosition(), true, false);
+	// 	if (nextMatch) {
+	// 		if (selection.equalsRange(nextMatch.range)) {
+	// 			// selection sits on a find match => replace it!
+	// 			let replaceString = replacePattern.buildReplaceString(nextMatch.matches, this._state.preserveCase);
+
+	// 			let command = new ReplaceCommand(selection, replaceString);
+
+	// 			this._executeEditorCommand('replace', command);
+
+	// 			this._decorations.setStartPosition(new Position(selection.startLineNumber, selection.startColumn + replaceString.length));
+	// 			this.research(true);
+	// 		} else {
+	// 			this._decorations.setStartPosition(this._editor.getPosition());
+	// 			this._setCurrentFindMatch(nextMatch.range);
+	// 		}
+	// 	}
+	// }
+	// //変更終了
+
 	//変更開始
 	public swapAll(): void {
+		if (this._state.isRegex) {
+			return;
+		}
 		if (!this._hasMatches()) {
 			return;
 		}

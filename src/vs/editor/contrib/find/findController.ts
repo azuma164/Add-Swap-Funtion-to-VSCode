@@ -373,6 +373,16 @@ export class CommonFindController extends Disposable implements IEditorContribut
 		return false;
 	}
 
+	// //変更開始
+	// public swap(): boolean {
+	// 	if (this._model) {
+	// 		this._model.swap();
+	// 		return true;
+	// 	}
+	// 	return false;
+	// }
+	// //変更終わり
+
 	//変更開始
 	public swapAll(): boolean {
 		if (this._model) {
