@@ -46,6 +46,9 @@ const findExpandedIcon = registerIcon('find-expanded', Codicon.chevronDown, nls.
 
 export const findReplaceIcon = registerIcon('find-replace', Codicon.replace, nls.localize('findReplaceIcon', 'Icon for \'Replace\' in the editor find widget.'));
 export const findReplaceAllIcon = registerIcon('find-replace-all', Codicon.replaceAll, nls.localize('findReplaceAllIcon', 'Icon for \'Replace All\' in the editor find widget.'));
+//変更開始(10/19 3限)
+export const findSwapAllIcon = registerIcon('find-swap-all', Codicon.swapAll, nls.localize('findSwapAllIcon', 'Icon for \'Swap All\' in the editor find widget.'));
+//変更終了
 export const findPreviousMatchIcon = registerIcon('find-previous-match', Codicon.arrowUp, nls.localize('findPreviousMatchIcon', 'Icon for \'Find Previous\' in the editor find widget.'));
 export const findNextMatchIcon = registerIcon('find-next-match', Codicon.arrowDown, nls.localize('findNextMatchIcon', 'Icon for \'Find Next\' in the editor find widget.'));
 
@@ -1186,7 +1189,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		// 変更開始
 		this._swapAllBtn = this._register(new SimpleButton({
 			label: NLS_SWAP_ALL_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.SwapAllAction),
-			icon: findReplaceAllIcon,
+			icon: findSwapAllIcon,
 			onTrigger: () => {
 				this._controller.swapAll();
 			}
