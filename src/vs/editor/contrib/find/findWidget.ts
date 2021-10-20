@@ -1238,9 +1238,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		replaceActionsContainer.appendChild(this._replaceBtn.domNode);
 		replaceActionsContainer.appendChild(this._replaceAllBtn.domNode);
-		// 変更開始
-		replaceActionsContainer.appendChild(this._swapAllBtn.domNode);
-		// 変更終了
 		// 仮変更開始
 		this._swapInput = this._register(new ContextScopedReplaceInput(null, undefined, {
 			label: NLS_SWAP_INPUT_LABEL,
@@ -1310,9 +1307,14 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		let swapPart = document.createElement('div');
 		swapPart.className = 'swap-part';
 		swapPart.appendChild(this._swapInput.domNode);
-		// const swapActionsContainer = document.createElement('div');
-		// swapActionsContainer.className = 'find-actions';
-		// swapPart.appendChild(swapActionsContainer);
+
+		const swapActionsContainer = document.createElement('div');
+		swapActionsContainer.className = 'swap-actions';
+		swapPart.appendChild(swapActionsContainer);
+
+		// 変更開始
+		swapActionsContainer.appendChild(this._swapAllBtn.domNode);
+		// 変更終了
 		// swapActionsContainer.appendChild(this._matchesCount);
 		// swapActionsContainer.appendChild(this._prevBtn.domNode);
 		// swapActionsContainer.appendChild(this._nextBtn.domNode);
