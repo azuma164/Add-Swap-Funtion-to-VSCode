@@ -72,6 +72,8 @@ const NLS_REPLACE_INPUT_PLACEHOLDER = nls.localize('placeholder.replace', "Repla
 const NLS_REPLACE_BTN_LABEL = nls.localize('label.replaceButton', "Replace");
 const NLS_REPLACE_ALL_BTN_LABEL = nls.localize('label.replaceAllButton', "Replace All");
 // 変更開始
+const NLS_SWAP_INPUT_LABEL = nls.localize('label.swap', "Swap");
+const NLS_SWAP_INPUT_PLACEHOLDER = nls.localize('placeholder.swap', "Swap");
 const NLS_SWAP_ALL_BTN_LABEL = nls.localize('label.swapAllButton', "Swap All");
 // 変更終了
 const NLS_TOGGLE_REPLACE_MODE_BTN_LABEL = nls.localize('label.toggleReplaceButton', "Toggle Replace");
@@ -1241,8 +1243,8 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		// 変更終了
 		// 仮変更開始
 		this._swapInput = this._register(new ContextScopedReplaceInput(null, undefined, {
-			label: NLS_REPLACE_INPUT_LABEL,
-			placeholder: NLS_REPLACE_INPUT_PLACEHOLDER,
+			label: NLS_SWAP_INPUT_LABEL,
+			placeholder: NLS_SWAP_INPUT_PLACEHOLDER,
 			appendPreserveCaseLabel: this._keybindingLabelFor(FIND_IDS.TogglePreserveCaseCommand),
 			history: [],
 			flexibleHeight,
@@ -1252,9 +1254,11 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}, this._contextKeyService, true));
 		this._swapInput.setPreserveCase(!!this._state.preserveCase);
 		this._register(this._swapInput.onKeyDown((e) => this._onReplaceInputKeyDown(e)));
+		// この下が悪さをしてるっぽい
 		this._register(this._swapInput.inputBox.onDidChange(() => {
 			this._state.change({ replaceString: this._swapInput.inputBox.value }, false);
 		}));
+		//
 		this._register(this._swapInput.inputBox.onDidHeightChange((e) => {
 			if (this._isReplaceVisible && this._tryUpdateHeight()) {
 				this._showViewZone();
@@ -1281,9 +1285,37 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			}
 		}));
 
+		// this._matchesCount = document.createElement('div');
+		// this._matchesCount.className = 'matchesCount';
+		// this._updateMatchesCount();
+
+		// // Previous button
+		// this._prevBtn = this._register(new SimpleButton({
+		// 	label: NLS_PREVIOUS_MATCH_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.PreviousMatchFindAction),
+		// 	icon: findPreviousMatchIcon,
+		// 	onTrigger: () => {
+		// 		this._codeEditor.getAction(FIND_IDS.PreviousMatchFindAction).run().then(undefined, onUnexpectedError);
+		// 	}
+		// }));
+
+		// // Next button
+		// this._nextBtn = this._register(new SimpleButton({
+		// 	label: NLS_NEXT_MATCH_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.NextMatchFindAction),
+		// 	icon: findNextMatchIcon,
+		// 	onTrigger: () => {
+		// 		this._codeEditor.getAction(FIND_IDS.NextMatchFindAction).run().then(undefined, onUnexpectedError);
+		// 	}
+		// }));
+
 		let swapPart = document.createElement('div');
 		swapPart.className = 'swap-part';
 		swapPart.appendChild(this._swapInput.domNode);
+		// const swapActionsContainer = document.createElement('div');
+		// swapActionsContainer.className = 'find-actions';
+		// swapPart.appendChild(swapActionsContainer);
+		// swapActionsContainer.appendChild(this._matchesCount);
+		// swapActionsContainer.appendChild(this._prevBtn.domNode);
+		// swapActionsContainer.appendChild(this._nextBtn.domNode);
 		// 仮変更終了
 		// Toggle replace button
 		this._toggleReplaceBtn = this._register(new SimpleButton({
@@ -1313,10 +1345,10 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		this._domNode.appendChild(this._toggleReplaceBtn.domNode);
 		this._domNode.appendChild(findPart);
-		this._domNode.appendChild(replacePart);
 		// 仮変更開始
 		this._domNode.appendChild(swapPart);
 		// 仮変更終了
+		this._domNode.appendChild(replacePart);
 
 		this._resizeSash = new Sash(this._domNode, this, { orientation: Orientation.VERTICAL, size: 2 });
 		this._resized = false;
@@ -1342,6 +1374,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			this._domNode.style.width = `${width}px`;
 			if (this._isReplaceVisible) {
 				this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
+				// 仮変更開始
+				this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
+				// 仮変更終了
 			}
 
 			this._findInput.inputBox.layout();
@@ -1375,6 +1410,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			this._domNode.style.width = `${width}px`;
 			if (this._isReplaceVisible) {
 				this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
+				// 仮変更開始
+				this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
+				// 仮変更終了
 			}
 
 			this._findInput.inputBox.layout();
