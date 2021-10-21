@@ -900,7 +900,8 @@ registerEditorCommand(new FindCommand({
 	kbOpts: {
 		weight: KeybindingWeight.EditorContrib + 5,
 		kbExpr: ContextKeyExpr.and(EditorContextKeys.focus, CONTEXT_REPLACE_INPUT_FOCUSED),
-		primary: KeyCode.Enter
+		primary: KeyCode.Enter | KeyMod.Shift,
+		//変更！！！！
 	}
 }));
 
@@ -948,7 +949,8 @@ registerEditorCommand(new FindCommand({
 	kbOpts: {
 		weight: KeybindingWeight.EditorContrib + 5,
 		kbExpr: EditorContextKeys.focus,
-		primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.Enter
+		// primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.Enter
+		primary: KeyCode.Enter,
 	}
 }));
 //変更終了

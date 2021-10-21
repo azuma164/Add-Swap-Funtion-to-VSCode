@@ -11,6 +11,9 @@ import { Checkbox } from 'vs/base/browser/ui/checkbox/checkbox';
 import { IContextViewProvider } from 'vs/base/browser/ui/contextview/contextview';
 import { FindInput, IFindInputStyles } from 'vs/base/browser/ui/findinput/findInput';
 import { ReplaceInput } from 'vs/base/browser/ui/findinput/replaceInput';
+//変更開始
+import { SwapInput } from 'vs/base/browser/ui/findinput/swapInput';
+//変更終了
 import { IMessage as InputBoxMessage } from 'vs/base/browser/ui/inputbox/inputBox';
 import { ISashEvent, IVerticalSashLayoutProvider, Orientation, Sash } from 'vs/base/browser/ui/sash/sash';
 import { Widget } from 'vs/base/browser/ui/widget';
@@ -30,7 +33,8 @@ import { CONTEXT_FIND_INPUT_FOCUSED, CONTEXT_REPLACE_INPUT_FOCUSED, FIND_IDS, MA
 import { FindReplaceState, FindReplaceStateChangedEvent } from 'vs/editor/contrib/find/findState';
 import * as nls from 'vs/nls';
 import { AccessibilitySupport } from 'vs/platform/accessibility/common/accessibility';
-import { ContextScopedFindInput, ContextScopedReplaceInput } from 'vs/platform/browser/contextScopedHistoryWidget';
+//変更↓(swap追加)
+import { ContextScopedFindInput, ContextScopedReplaceInput, ContextScopedSwapInput } from 'vs/platform/browser/contextScopedHistoryWidget';
 import { showHistoryKeybindingHint } from 'vs/platform/browser/historyWidgetKeybindingHint';
 import { IContextKey, IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
 import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
@@ -90,6 +94,9 @@ let MAX_MATCHES_COUNT_WIDTH = 69;
 
 const FIND_INPUT_AREA_HEIGHT = 33; // The height of Find Widget when Replace Input is not visible.
 const ctrlEnterReplaceAllWarningPromptedKey = 'ctrlEnterReplaceAll.windows.donotask';
+//変更開始(2021/10/21)
+const ctrlEnterSwapAllWarningPromptedKey = 'ctrlEnterSwapAll.windows.donotask';
+//変更終了
 
 const ctrlKeyMod = (platform.isMacintosh ? KeyMod.WinCtrl : KeyMod.CtrlCmd);
 export class FindWidgetViewZone implements IViewZone {
@@ -140,7 +147,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _findInput!: FindInput;
 	private _replaceInput!: ReplaceInput;
 	// 仮変更開始
-	private _swapInput!: ReplaceInput;
+	private _swapInput!: SwapInput;
 	// 仮変更終了
 
 	private _toggleReplaceBtn!: SimpleButton;
@@ -159,11 +166,18 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _isReplaceVisible: boolean;
 	private _ignoreChangeEvent: boolean;
 	private _ctrlEnterReplaceAllWarningPrompted: boolean;
+	//変更開始(2021/10/21)
+	private _ctrlEnterSwapAllWarningPrompted: boolean;
+	//変更終了
 
 	private readonly _findFocusTracker: dom.IFocusTracker;
 	private readonly _findInputFocused: IContextKey<boolean>;
 	private readonly _replaceFocusTracker: dom.IFocusTracker;
 	private readonly _replaceInputFocused: IContextKey<boolean>;
+	//仮変更開始(2021/10/21)
+	private readonly _swapFocusTracker: dom.IFocusTracker;
+	private readonly _swapInputFocused: IContextKey<boolean>;
+	//仮変更終了
 	private _viewZone?: FindWidgetViewZone;
 	private _viewZoneId?: string;
 
@@ -193,6 +207,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._notificationService = notificationService;
 
 		this._ctrlEnterReplaceAllWarningPrompted = !!storageService.getBoolean(ctrlEnterReplaceAllWarningPromptedKey, StorageScope.GLOBAL);
+		//変更開始(2021/10/21)
+		this._ctrlEnterSwapAllWarningPrompted = !!storageService.getBoolean(ctrlEnterSwapAllWarningPromptedKey, StorageScope.GLOBAL);
+		//変更開始
 
 		this._isVisible = false;
 		this._isReplaceVisible = false;
@@ -267,6 +284,18 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._register(this._replaceFocusTracker.onDidBlur(() => {
 			this._replaceInputFocused.set(false);
 		}));
+
+		//変更開始(2021/10/21)
+		this._swapInputFocused = CONTEXT_REPLACE_INPUT_FOCUSED.bindTo(contextKeyService);
+		this._swapFocusTracker = this._register(dom.trackFocus(this._swapInput.inputBox.inputElement));
+		this._register(this._swapFocusTracker.onDidFocus(() => {
+			this._swapInputFocused.set(true);
+			this._updateSearchScope();
+		}));
+		this._register(this._swapFocusTracker.onDidBlur(() => {
+			this._swapInputFocused.set(false);
+		}));
+		//変更終了
 
 		this._codeEditor.addOverlayWidget(this);
 		if (this._codeEditor.getOption(EditorOption.find).addExtraSpaceOnTop) {
@@ -858,6 +887,14 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._replaceInput.focus();
 	}
 
+	//変更開始(2021/10/21)
+	public focusSwapInput(): void {
+		this._swapInput.select();
+		// Edge browser requires focus() in addition to select()
+		this._swapInput.focus();
+	}
+	//変更終了
+
 	public highlightFindOptions(): void {
 		this._findInput.highlightFindOptions();
 	}
@@ -913,7 +950,8 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		if (e.equals(KeyCode.Tab)) {
 			if (this._isReplaceVisible) {
-				this._replaceInput.focus();
+				//変更(replace→swap)
+				this._swapInput.focus();
 			} else {
 				this._findInput.focusOnCaseSensitive();
 			}
@@ -936,6 +974,58 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}
 	}
 
+	//変更開始(2021/10/21)
+	private _onSwapInputKeyDown(e: IKeyboardEvent): void {
+		if (e.equals(ctrlKeyMod | KeyCode.Enter)) {
+			if (this._keybindingService.dispatchEvent(e, e.target)) {
+				e.preventDefault();
+				return;
+			} else {
+				if (platform.isWindows && platform.isNative && !this._ctrlEnterSwapAllWarningPrompted) {
+					// this is the first time when users press Ctrl + Enter to swap all
+					this._notificationService.info(
+						nls.localize('ctrlEnterSwap.keybindingChanged',
+							'Ctrl+Enter now inserts line break instead of replacing all. You can modify the keybinding for editor.action.swapAll to override this behavior.')
+					);
+
+					this._ctrlEnterSwapAllWarningPrompted = true;
+					this._storageService.store(ctrlEnterSwapAllWarningPromptedKey, true, StorageScope.GLOBAL, StorageTarget.USER);
+				}
+				this._swapInput.inputBox.insertAtCursor('\n');
+				e.preventDefault();
+				return;
+			}
+
+		}
+
+		if (e.equals(KeyCode.Tab)) {
+			this._replaceInput.focus();
+			e.preventDefault();
+			return;
+		}
+
+		if (e.equals(KeyMod.Shift | KeyCode.Tab)) {
+			this._findInput.focus();
+			e.preventDefault();
+			return;
+		}
+
+		if (e.equals(KeyMod.CtrlCmd | KeyCode.DownArrow)) {
+			this._codeEditor.focus();
+			e.preventDefault();
+			return;
+		}
+
+		if (e.equals(KeyCode.UpArrow)) {
+			return stopPropagationForMultiLineUpwards(e, this._swapInput.inputBox.value, this._swapInput.inputBox.element.querySelector('textarea'));
+		}
+
+		if (e.equals(KeyCode.DownArrow)) {
+			return stopPropagationForMultiLineDownwards(e, this._swapInput.inputBox.value, this._swapInput.inputBox.element.querySelector('textarea'));
+		}
+	}
+	//変更終了
+
 	private _onReplaceInputKeyDown(e: IKeyboardEvent): void {
 		if (e.equals(ctrlKeyMod | KeyCode.Enter)) {
 			if (this._keybindingService.dispatchEvent(e, e.target)) {
@@ -945,16 +1035,13 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				if (platform.isWindows && platform.isNative && !this._ctrlEnterReplaceAllWarningPrompted) {
 					// this is the first time when users press Ctrl + Enter to replace all
 					this._notificationService.info(
-						nls.localize('ctrlEnter.keybindingChanged',
+						nls.localize('ctrlEnterReplace.keybindingChanged',
 							'Ctrl+Enter now inserts line break instead of replacing all. You can modify the keybinding for editor.action.replaceAll to override this behavior.')
 					);
 
 					this._ctrlEnterReplaceAllWarningPrompted = true;
 					this._storageService.store(ctrlEnterReplaceAllWarningPromptedKey, true, StorageScope.GLOBAL, StorageTarget.USER);
 				}
-				//仮変更開始(takahara)
-				this._swapInput.inputBox.insertAtCursor('\n');
-				//仮変更終了
 				this._replaceInput.inputBox.insertAtCursor('\n');
 				e.preventDefault();
 				return;
@@ -969,7 +1056,8 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}
 
 		if (e.equals(KeyMod.Shift | KeyCode.Tab)) {
-			this._findInput.focus();
+			//変更(find→swap)
+			this._swapInput.focus();
 			e.preventDefault();
 			return;
 		}
@@ -1160,6 +1248,50 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		actionsContainer.appendChild(this._closeBtn.domNode);
 
+		//変更開始(2021/10/21)もうちょい中身を見たい、、、
+		// Swap input
+		this._swapInput = this._register(new ContextScopedSwapInput(null, undefined, {
+			label: NLS_REPLACE_INPUT_LABEL,
+			placeholder: NLS_REPLACE_INPUT_PLACEHOLDER,
+			appendPreserveCaseLabel: this._keybindingLabelFor(FIND_IDS.TogglePreserveCaseCommand),
+			history: [],
+			flexibleHeight,
+			flexibleWidth,
+			flexibleMaxHeight: 118,
+			showHistoryHint: () => showHistoryKeybindingHint(this._keybindingService)
+		}, this._contextKeyService, true));
+		this._swapInput.setPreserveCase(!!this._state.preserveCase);
+		this._register(this._swapInput.onKeyDown((e) => this._onSwapInputKeyDown(e)));
+		this._register(this._swapInput.inputBox.onDidChange(() => {
+			this._state.change({ swapString: this._swapInput.inputBox.value }, false);
+		}));
+		this._register(this._swapInput.inputBox.onDidHeightChange((e) => {
+			if (this._isReplaceVisible && this._tryUpdateHeight()) {
+				this._showViewZone();
+			}
+		}));
+		this._register(this._swapInput.onDidOptionChange(() => {
+			this._state.change({
+				preserveCase: this._swapInput.getPreserveCase()
+			}, true);
+		}));
+		this._register(this._swapInput.onPreserveCaseKeyDown((e) => {
+			if (e.equals(KeyCode.Tab)) {
+				if (this._prevBtn.isEnabled()) {
+					this._prevBtn.focus();
+				} else if (this._nextBtn.isEnabled()) {
+					this._nextBtn.focus();
+				} else if (this._toggleSelectionFind.enabled) {
+					this._toggleSelectionFind.focus();
+				} else if (this._closeBtn.isEnabled()) {
+					this._closeBtn.focus();
+				}
+
+				e.preventDefault();
+			}
+		}));
+		//変更終了
+
 		// Replace input
 		this._replaceInput = this._register(new ContextScopedReplaceInput(null, undefined, {
 			label: NLS_REPLACE_INPUT_LABEL,
@@ -1246,7 +1378,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		replaceActionsContainer.appendChild(this._replaceBtn.domNode);
 		replaceActionsContainer.appendChild(this._replaceAllBtn.domNode);
 		// 仮変更開始
-		this._swapInput = this._register(new ContextScopedReplaceInput(null, undefined, {
+		this._swapInput = this._register(new ContextScopedSwapInput(null, undefined, {
 			label: NLS_SWAP_INPUT_LABEL,
 			placeholder: NLS_SWAP_INPUT_PLACEHOLDER,
 			appendPreserveCaseLabel: this._keybindingLabelFor(FIND_IDS.TogglePreserveCaseCommand),
