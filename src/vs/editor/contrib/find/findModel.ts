@@ -33,6 +33,9 @@ export const CONTEXT_FIND_WIDGET_NOT_VISIBLE = CONTEXT_FIND_WIDGET_VISIBLE.toNeg
 // Keep ContextKey use of 'Focussed' to not break when clauses
 export const CONTEXT_FIND_INPUT_FOCUSED = new RawContextKey<boolean>('findInputFocussed', false);
 export const CONTEXT_REPLACE_INPUT_FOCUSED = new RawContextKey<boolean>('replaceInputFocussed', false);
+//変更開始
+export const CONTEXT_SWAP_INPUT_FOCUSED = new RawContextKey<boolean>('swapInputFocussed', false);
+//変更終了
 
 export const ToggleCaseSensitiveKeybinding: IKeybindings = {
 	primary: KeyMod.Alt | KeyCode.KEY_C,

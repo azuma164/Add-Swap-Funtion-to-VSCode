@@ -29,7 +29,7 @@ import 'vs/css!./findWidget';
 import { ICodeEditor, IOverlayWidget, IOverlayWidgetPosition, IViewZone, OverlayWidgetPositionPreference } from 'vs/editor/browser/editorBrowser';
 import { ConfigurationChangedEvent, EditorOption } from 'vs/editor/common/config/editorOptions';
 import { Range } from 'vs/editor/common/core/range';
-import { CONTEXT_FIND_INPUT_FOCUSED, CONTEXT_REPLACE_INPUT_FOCUSED, FIND_IDS, MATCHES_LIMIT } from 'vs/editor/contrib/find/findModel';
+import { CONTEXT_FIND_INPUT_FOCUSED, CONTEXT_REPLACE_INPUT_FOCUSED, CONTEXT_REPLACE_INPUT_FOCUSED, FIND_IDS, MATCHES_LIMIT } from 'vs/editor/contrib/find/findModel';
 import { FindReplaceState, FindReplaceStateChangedEvent } from 'vs/editor/contrib/find/findState';
 import * as nls from 'vs/nls';
 import { AccessibilitySupport } from 'vs/platform/accessibility/common/accessibility';
@@ -286,7 +286,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}));
 
 		//変更開始(2021/10/21)
-		this._swapInputFocused = CONTEXT_REPLACE_INPUT_FOCUSED.bindTo(contextKeyService);
+		this._swapInputFocused = CONTEXT_SWAP_INPUT_FOCUSED.bindTo(contextKeyService);
 		this._swapFocusTracker = this._register(dom.trackFocus(this._swapInput.inputBox.inputElement));
 		this._register(this._swapFocusTracker.onDidFocus(() => {
 			this._swapInputFocused.set(true);
@@ -1358,6 +1358,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			}
 		}));
 		// 変更開始
+		// Swap all button
 		this._swapAllBtn = this._register(new SimpleButton({
 			label: NLS_SWAP_ALL_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.SwapAllAction),
 			icon: findSwapAllIcon,
@@ -1377,7 +1378,11 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		replaceActionsContainer.appendChild(this._replaceBtn.domNode);
 		replaceActionsContainer.appendChild(this._replaceAllBtn.domNode);
+
+
+
 		// 仮変更開始
+		// Swap Input
 		this._swapInput = this._register(new ContextScopedSwapInput(null, undefined, {
 			label: NLS_SWAP_INPUT_LABEL,
 			placeholder: NLS_SWAP_INPUT_PLACEHOLDER,
