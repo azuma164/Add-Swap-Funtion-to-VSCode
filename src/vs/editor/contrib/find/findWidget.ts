@@ -331,6 +331,11 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		if (e.replaceString) {
 			this._replaceInput.inputBox.value = this._state.replaceString;
 		}
+		//変更開始(takahara)
+		if (e.swapString) {
+			this._swapInput.inputBox.value = this._state.swapString;
+		}
+		//変更終了
 		if (e.isRevealed) {
 			if (this._state.isRevealed) {
 				this._reveal();
@@ -947,7 +952,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 					this._ctrlEnterReplaceAllWarningPrompted = true;
 					this._storageService.store(ctrlEnterReplaceAllWarningPromptedKey, true, StorageScope.GLOBAL, StorageTarget.USER);
 				}
-
+				//仮変更開始(takahara)
+				this._swapInput.inputBox.insertAtCursor('\n');
+				//仮変更終了
 				this._replaceInput.inputBox.insertAtCursor('\n');
 				e.preventDefault();
 				return;
@@ -1253,7 +1260,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._register(this._swapInput.onKeyDown((e) => this._onReplaceInputKeyDown(e)));
 		// この下が悪さをしてるっぽい
 		this._register(this._swapInput.inputBox.onDidChange(() => {
-			this._state.change({ replaceString: this._swapInput.inputBox.value }, false);
+			this._state.change({ swapString: this._swapInput.inputBox.value }, false);
 		}));
 		//
 		this._register(this._swapInput.inputBox.onDidHeightChange((e) => {

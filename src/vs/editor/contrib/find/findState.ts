@@ -13,6 +13,9 @@ export interface FindReplaceStateChangedEvent {
 	updateHistory: boolean;
 
 	searchString: boolean;
+	//変更開始(sakurai)
+	swapString: boolean;
+	//変更終了
 	replaceString: boolean;
 	isRevealed: boolean;
 	isReplaceRevealed: boolean;
@@ -35,6 +38,9 @@ export const enum FindOptionOverride {
 
 export interface INewFindReplaceState {
 	searchString?: string;
+	//変更開始(sakurai)
+	swapString?: string;
+	//変更終了
 	replaceString?: string;
 	isRevealed?: boolean;
 	isReplaceRevealed?: boolean;
@@ -62,6 +68,9 @@ function effectiveOptionValue(override: FindOptionOverride, value: boolean): boo
 
 export class FindReplaceState extends Disposable {
 	private _searchString: string;
+	//変更開始(sakurai)
+	private _swapString: string;
+	//変更終了
 	private _replaceString: string;
 	private _isRevealed: boolean;
 	private _isReplaceRevealed: boolean;
@@ -81,6 +90,9 @@ export class FindReplaceState extends Disposable {
 	private readonly _onFindReplaceStateChange = this._register(new Emitter<FindReplaceStateChangedEvent>());
 
 	public get searchString(): string { return this._searchString; }
+	//変更開始(sakurai)
+	public get swapString(): string { return this._swapString; }
+	//変更終了
 	public get replaceString(): string { return this._replaceString; }
 	public get isRevealed(): boolean { return this._isRevealed; }
 	public get isReplaceRevealed(): boolean { return this._isReplaceRevealed; }
@@ -103,6 +115,9 @@ export class FindReplaceState extends Disposable {
 	constructor() {
 		super();
 		this._searchString = '';
+		//変更開始(sakurai)
+		this._swapString = '';
+		//変更終了
 		this._replaceString = '';
 		this._isRevealed = false;
 		this._isReplaceRevealed = false;
@@ -126,6 +141,9 @@ export class FindReplaceState extends Disposable {
 			moveCursor: false,
 			updateHistory: false,
 			searchString: false,
+			//変更開始(sakurai)
+			swapString: false,
+			//変更終了
 			replaceString: false,
 			isRevealed: false,
 			isReplaceRevealed: false,
@@ -177,6 +195,9 @@ export class FindReplaceState extends Disposable {
 			moveCursor: moveCursor,
 			updateHistory: updateHistory,
 			searchString: false,
+			//変更開始(sakurai)
+			swapString: false,
+			//変更終了
 			replaceString: false,
 			isRevealed: false,
 			isReplaceRevealed: false,
@@ -204,6 +225,15 @@ export class FindReplaceState extends Disposable {
 				somethingChanged = true;
 			}
 		}
+		//変更開始(sakurai)
+		if (typeof newState.swapString !== 'undefined') {
+			if (this._swapString !== newState.swapString) {
+				this._swapString = newState.swapString;
+				changeEvent.swapString = true;
+				somethingChanged = true;
+			}
+		}
+		//変更終了
 		if (typeof newState.replaceString !== 'undefined') {
 			if (this._replaceString !== newState.replaceString) {
 				this._replaceString = newState.replaceString;
