@@ -448,6 +448,11 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		if (this._state.replaceString) {
 			this._replaceInput.inputBox.addToHistory();
 		}
+		//変更開始
+		if (this._state.swapString) {
+			this._swapInput.inputBox.addToHistory();
+		}
+		//変更終了
 	}
 
 	private _updateMatchesCount(): void {
