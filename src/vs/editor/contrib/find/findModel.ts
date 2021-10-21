@@ -462,11 +462,20 @@ export class FindModelBoundToEditorModel {
 	}
 
 	//変更開始
-	private _getSwapPattern(): ReplacePattern {
+	private _getSearchPattern(): ReplacePattern {
 		if (this._state.isRegex) {
 			return parseReplaceString(this._state.searchString);
 		}
 		return ReplacePattern.fromStaticValue(this._state.searchString);
+	}
+	//変更終了
+
+	//変更開始(2021/10/21)
+	private _getSwapPattern(): ReplacePattern {
+		if (this._state.isRegex) {
+			return parseReplaceString(this._state.swapString);
+		}
+		return ReplacePattern.fromStaticValue(this._state.swapString);
 	}
 	//変更終了
 
@@ -510,7 +519,7 @@ export class FindModelBoundToEditorModel {
 			FindModelBoundToEditorModel._getSearchRange(this._editor.getModel(), scope)
 		);
 
-		return this._editor.getModel().findMatches(this._state.replaceString, searchRanges, this._state.isRegex, this._state.matchCase, this._state.wholeWord ? this._editor.getOption(EditorOption.wordSeparators) : null, captureMatches, limitResultCount);
+		return this._editor.getModel().findMatches(this._state.swapString, searchRanges, this._state.isRegex, this._state.matchCase, this._state.wholeWord ? this._editor.getOption(EditorOption.wordSeparators) : null, captureMatches, limitResultCount);
 	}
 	//変更終了
 
@@ -676,22 +685,22 @@ export class FindModelBoundToEditorModel {
 	}
 
 	private _regularSwapAll(findScopes: Range[] | null): void {
-		const replacePattern = this._getReplacePattern();
 		const swapPattern = this._getSwapPattern();
+		const searchPattern = this._getSearchPattern();
 		// Get all the ranges (even more than the highlighted ones)
-		let matches1 = this._findMatches(findScopes, replacePattern.hasReplacementPatterns || this._state.preserveCase, Constants.MAX_SAFE_SMALL_INTEGER);
+		let matches1 = this._findMatches(findScopes, swapPattern.hasReplacementPatterns || this._state.preserveCase, Constants.MAX_SAFE_SMALL_INTEGER);
 
 		//swap用に作ったやつ
-		let matches2 = this._findMatchesForSwap(findScopes, replacePattern.hasReplacementPatterns || this._state.preserveCase, Constants.MAX_SAFE_SMALL_INTEGER);
+		let matches2 = this._findMatchesForSwap(findScopes, searchPattern.hasReplacementPatterns || this._state.preserveCase, Constants.MAX_SAFE_SMALL_INTEGER);
 
 		let swapStrings1: string[] = [];
 		for (let i = 0, len = matches1.length; i < len; i++) {
-			swapStrings1[i] = replacePattern.buildReplaceString(matches1[i].matches, this._state.preserveCase);
+			swapStrings1[i] = swapPattern.buildReplaceString(matches1[i].matches, this._state.preserveCase);
 		}
 
 		let swapStrings2: string[] = [];
 		for (let i = 0, len = matches2.length; i < len; i++) {
-			swapStrings2[i] = swapPattern.buildReplaceString(matches2[i].matches, this._state.preserveCase);
+			swapStrings2[i] = searchPattern.buildReplaceString(matches2[i].matches, this._state.preserveCase);
 		}
 		//let command = new ReplaceAllCommand(this._editor.getSelection(), matches1.map(m => m.range).concat(matches2.map(m => m.range)), swapStrings);
 		let command = new SwapAllCommand(this._editor.getSelection(), matches1.map(m => m.range), swapStrings1, matches2.map(m => m.range), swapStrings2);
