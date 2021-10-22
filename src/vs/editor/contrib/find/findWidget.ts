@@ -1399,7 +1399,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			showHistoryHint: () => showHistoryKeybindingHint(this._keybindingService)
 		}, this._contextKeyService, true));
 		this._swapInput.setPreserveCase(!!this._state.preserveCase);
-		this._register(this._swapInput.onKeyDown((e) => this._onReplaceInputKeyDown(e)));
+		this._register(this._swapInput.onKeyDown((e) => this._onSwapInputKeyDown(e)));
 		// この下が悪さをしてるっぽい
 		this._register(this._swapInput.inputBox.onDidChange(() => {
 			this._state.change({ swapString: this._swapInput.inputBox.value }, false);

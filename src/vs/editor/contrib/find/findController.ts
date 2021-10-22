@@ -12,7 +12,7 @@ import { EditorAction, EditorCommand, MultiEditorAction, registerEditorAction, r
 import { EditorOption } from 'vs/editor/common/config/editorOptions';
 import { IEditorContribution } from 'vs/editor/common/editorCommon';
 import { EditorContextKeys } from 'vs/editor/common/editorContextKeys';
-import { CONTEXT_FIND_INPUT_FOCUSED, CONTEXT_FIND_WIDGET_VISIBLE, CONTEXT_REPLACE_INPUT_FOCUSED, FindModelBoundToEditorModel, FIND_IDS, ToggleCaseSensitiveKeybinding, TogglePreserveCaseKeybinding, ToggleRegexKeybinding, ToggleSearchScopeKeybinding, ToggleWholeWordKeybinding } from 'vs/editor/contrib/find/findModel';
+import { CONTEXT_FIND_INPUT_FOCUSED, CONTEXT_FIND_WIDGET_VISIBLE, CONTEXT_REPLACE_INPUT_FOCUSED, CONTEXT_SWAP_INPUT_FOCUSED, FindModelBoundToEditorModel, FIND_IDS, ToggleCaseSensitiveKeybinding, TogglePreserveCaseKeybinding, ToggleRegexKeybinding, ToggleSearchScopeKeybinding, ToggleWholeWordKeybinding } from 'vs/editor/contrib/find/findModel';
 import { FindOptionsWidget } from 'vs/editor/contrib/find/findOptionsWidget';
 import { FindReplaceState, FindReplaceStateChangedEvent, INewFindReplaceState } from 'vs/editor/contrib/find/findState';
 import { FindWidget, IFindController } from 'vs/editor/contrib/find/findWidget';
@@ -57,7 +57,10 @@ export function getSelectionSearchString(editor: ICodeEditor, seedSearchStringFr
 export const enum FindStartFocusAction {
 	NoFocusChange,
 	FocusFindInput,
-	FocusReplaceInput
+	FocusReplaceInput,
+	//変更開始(2021/10/22)
+	FocusSwapInput,
+	//変更終了
 }
 
 export interface IFindStartOptions {
@@ -195,6 +198,16 @@ export class CommonFindController extends Disposable implements IEditorContribut
 	public isFindInputFocused(): boolean {
 		return !!CONTEXT_FIND_INPUT_FOCUSED.getValue(this._contextKeyService);
 	}
+
+	//変更開始(2021/10/21)
+	public isSwapInputFocused(): boolean {
+		return !!CONTEXT_SWAP_INPUT_FOCUSED.getValue(this._contextKeyService);
+	}
+
+	public isReplaceInputFocused(): boolean {
+		return !!CONTEXT_REPLACE_INPUT_FOCUSED.getValue(this._contextKeyService);
+	}
+	//変更終了
 
 	public getState(): FindReplaceState {
 		return this._state;
@@ -476,6 +489,9 @@ export class FindController extends CommonFindController implements IFindControl
 				this._widget.focusReplaceInput();
 			} else if (opts.shouldFocus === FindStartFocusAction.FocusFindInput) {
 				this._widget.focusFindInput();
+			} else if (opts.shouldFocus === FindStartFocusAction.FocusSwapInput) { //変更開始
+				this._widget.focusSwapInput();
+				//変更終了
 			}
 		}
 	}
@@ -762,12 +778,21 @@ StartFindReplaceAction.addImplementation(0, (accessor: ServicesAccessor, editor:
 
 	const currentSelection = editor.getSelection();
 	const findInputFocused = controller.isFindInputFocused();
+
+	//変更開始(2021/10/22)
+	// const replaceInputFocused = controller.isReplaceInputFocused();
+	const swapInputFocused = controller.isSwapInputFocused();
+	//変更終了
+
+
 	// we only seed search string from selection when the current selection is single line and not empty,
 	// + the find input is not focused
 	const seedSearchStringFromSelection = !currentSelection.isEmpty()
 		&& currentSelection.startLineNumber === currentSelection.endLineNumber
 		&& (editor.getOption(EditorOption.find).seedSearchStringFromSelection !== 'never')
 		&& !findInputFocused;
+
+	//変更開始(コメントアウトが元の処理)
 	/*
 	* if the existing search string in find widget is empty and we don't seed search string from selection, it means the Find Input is still empty, so we should focus the Find Input instead of Replace Input.
 
@@ -775,8 +800,13 @@ StartFindReplaceAction.addImplementation(0, (accessor: ServicesAccessor, editor:
 	* findInputFocused false, seedSearchStringFromSelection true FocusReplaceInput
 	* findInputFocused false seedSearchStringFromSelection false FocusFindInput
 	*/
+	// const shouldFocus = (findInputFocused || seedSearchStringFromSelection) ?
+	// FindStartFocusAction.FocusReplaceInput : FindStartFocusAction.FocusFindInput;
+
 	const shouldFocus = (findInputFocused || seedSearchStringFromSelection) ?
-		FindStartFocusAction.FocusReplaceInput : FindStartFocusAction.FocusFindInput;
+		FindStartFocusAction.FocusSwapInput : ((swapInputFocused) ?
+			FindStartFocusAction.FocusReplaceInput : FindStartFocusAction.FocusFindInput);
+	//変更終了
 
 	return controller.start({
 		forceRevealReplace: true,

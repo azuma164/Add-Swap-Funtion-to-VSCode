@@ -29,8 +29,8 @@
 	display: flex;
 }
 
-/* 変更開始(2021/10/20) */
-.monaco-editor .find-widget.replaceToggled > .swap-part {
+/* 変更開始(2021/10/20, 追記 2021/10/22) */
+.monaco-editor .find-widget.swapToggled > .swap-part {
 	display: flex;
 }
 /* 変更終了 */
@@ -73,8 +73,8 @@
 	min-height: 25px;
 }
 
-/* 変更開始(2021/10/20) */
-.monaco-editor .find-widget > .replace-part .monaco-inputbox {
+/* 変更開始(2021/10/20,追記 2021/10/22) */
+.monaco-editor .find-widget > .swap-part .monaco-inputbox {
 	min-height: 25px;
 }
 /* 変更終了 */
