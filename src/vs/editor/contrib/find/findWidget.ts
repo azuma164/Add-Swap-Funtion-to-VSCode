@@ -1162,7 +1162,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._register(this._findInput.onRegexKeyDown((e) => {
 			if (e.equals(KeyCode.Tab)) {
 				if (this._isReplaceVisible) {
-					this._replaceInput.focusOnPreserve();
+					this._swapInput.focusOnWholeWords();
 					e.preventDefault();
 				}
 			}
@@ -1250,7 +1250,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			onKeyDown: (e) => {
 				if (e.equals(KeyCode.Tab)) {
 					if (this._isReplaceVisible) {
-						if (this._replaceBtn.isEnabled()) {
+						if (this._swapAllBtn.isEnabled()) {
+							this._swapAllBtn.focus();
+						} else if (this._replaceBtn.isEnabled()) {
 							this._replaceBtn.focus();
 						} else {
 							this._codeEditor.focus();
@@ -1282,6 +1284,14 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._register(this._swapInput.inputBox.onDidChange(() => {
 			this._state.change({ swapString: this._swapInput.inputBox.value }, false);
 		}));
+		this._register(this._swapInput.onWholeWordsKeyDown((e) => {
+			if (e.equals(KeyCode.Tab)) {
+				if (this._isReplaceVisible) {
+					this._replaceInput.focusOnPreserve();
+					e.preventDefault();
+				}
+			}
+		}));
 		this._register(this._swapInput.inputBox.onDidHeightChange((e) => {
 			if (this._isReplaceVisible && this._tryUpdateHeight()) {
 				this._showViewZone();
@@ -1300,6 +1310,16 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			icon: findSwapAllIcon,
 			onTrigger: () => {
 				this._controller.swapAll();
+			},
+			onKeyDown: (e) => {
+				if (e.equals(KeyMod.Shift | KeyCode.Tab)) {
+					this._closeBtn.focus();
+					e.preventDefault();
+				}
+				if (e.equals(KeyCode.Tab)) {
+					this._replaceBtn.focus();
+					e.preventDefault();
+				}
 			}
 		}));
 
@@ -1365,7 +1385,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			},
 			onKeyDown: (e) => {
 				if (e.equals(KeyMod.Shift | KeyCode.Tab)) {
-					this._closeBtn.focus();
+					this._swapAllBtn.focus();
 					e.preventDefault();
 				}
 			}

@@ -89,6 +89,9 @@ export class SwapInput extends Widget {
 	private readonly _onKeyUp = this._register(new Emitter<IKeyboardEvent>());
 	public readonly onKeyUp: Event<IKeyboardEvent> = this._onKeyUp.event;
 
+	private _onWholeWordsKeyDown = this._register(new Emitter<IKeyboardEvent>());
+	public readonly onWholeWordsKeyDown: Event<IKeyboardEvent> = this._onWholeWordsKeyDown.event;
+
 	constructor(parent: HTMLElement | null, contextViewProvider: IContextViewProvider | undefined, private readonly _showOptionButtons: boolean, options: ISwapInputOptions) {
 		super();
 		this.contextViewProvider = contextViewProvider;
@@ -146,7 +149,6 @@ export class SwapInput extends Widget {
 			flexibleWidth,
 			flexibleMaxHeight
 		}));
-
 		// 変更開始(2021/10/24)
 		this.wholeWords = this._register(new WholeWordsCheckbox({
 			appendTitle: appendWholeWordsLabel,
@@ -161,6 +163,9 @@ export class SwapInput extends Widget {
 				this.inputBox.focus();
 			}
 			this.validate();
+		}));
+		this._register(this.wholeWords.onKeyDown(e => {
+			this._onWholeWordsKeyDown.fire(e);
 		}));
 
 		if (this._showOptionButtons) {
@@ -329,6 +334,11 @@ export class SwapInput extends Widget {
 	public setWholeWords(value: boolean): void {
 		this.wholeWords.checked = value;
 	}
+
+	public focusOnWholeWords(): void {
+		this.wholeWords.focus();
+	}
+
 	// 変更終了
 	private _lastHighlightFindOptions: number = 0;
 	public highlightFindOptions(): void {
