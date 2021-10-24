@@ -6,12 +6,11 @@
 import * as dom from 'vs/base/browser/dom';
 import { IKeyboardEvent } from 'vs/base/browser/keyboardEvent';
 import { IMouseEvent } from 'vs/base/browser/mouseEvent';
-import { Checkbox, ICheckboxStyles } from 'vs/base/browser/ui/checkbox/checkbox';
+import { ICheckboxStyles } from 'vs/base/browser/ui/checkbox/checkbox';
 import { IContextViewProvider } from 'vs/base/browser/ui/contextview/contextview';
-import { IFindInputCheckboxOpts, WholeWordsCheckbox } from 'vs/base/browser/ui/findinput/findInputCheckboxes';
+import { WholeWordsCheckbox } from 'vs/base/browser/ui/findinput/findInputCheckboxes';
 import { HistoryInputBox, IInputBoxStyles, IInputValidator, IMessage as InputBoxMessage } from 'vs/base/browser/ui/inputbox/inputBox';
 import { Widget } from 'vs/base/browser/ui/widget';
-import { Codicon } from 'vs/base/common/codicons';
 import { Color } from 'vs/base/common/color';
 import { Emitter, Event } from 'vs/base/common/event';
 import { KeyCode } from 'vs/base/common/keyCodes';
@@ -28,7 +27,6 @@ export interface ISwapInputOptions extends ISwapInputStyles {
 	readonly flexibleWidth?: boolean;
 	readonly flexibleMaxHeight?: number;
 
-	readonly appendPreserveCaseLabel?: string;
 	readonly appendWholeWordsLabel?: string;
 	readonly history?: string[];
 	readonly showHistoryHint?: () => boolean;
@@ -41,21 +39,6 @@ export interface ISwapInputStyles extends IInputBoxStyles {
 }
 
 const NLS_DEFAULT_LABEL = nls.localize('defaultLabel', "input");
-const NLS_PRESERVE_CASE_LABEL = nls.localize('label.preserveCaseCheckbox', "Preserve Case");
-
-export class PreserveCaseCheckbox extends Checkbox {
-	constructor(opts: IFindInputCheckboxOpts) {
-		super({
-			// TODO: does this need its own icon?
-			icon: Codicon.preserveCase,
-			title: NLS_PRESERVE_CASE_LABEL + opts.appendTitle,
-			isChecked: opts.isChecked,
-			inputActiveOptionBorder: opts.inputActiveOptionBorder,
-			inputActiveOptionForeground: opts.inputActiveOptionForeground,
-			inputActiveOptionBackground: opts.inputActiveOptionBackground
-		});
-	}
-}
 
 export class SwapInput extends Widget {
 
@@ -84,7 +67,6 @@ export class SwapInput extends Widget {
 	private inputValidationErrorBackground?: Color;
 	private inputValidationErrorForeground?: Color;
 
-	private preserveCase: PreserveCaseCheckbox;
 	// 変更開始(2021/10/24)
 	private wholeWords: WholeWordsCheckbox;
 	// 変更終了
@@ -106,9 +88,6 @@ export class SwapInput extends Widget {
 
 	private readonly _onKeyUp = this._register(new Emitter<IKeyboardEvent>());
 	public readonly onKeyUp: Event<IKeyboardEvent> = this._onKeyUp.event;
-
-	private _onPreserveCaseKeyDown = this._register(new Emitter<IKeyboardEvent>());
-	public readonly onPreserveCaseKeyDown: Event<IKeyboardEvent> = this._onPreserveCaseKeyDown.event;
 
 	constructor(parent: HTMLElement | null, contextViewProvider: IContextViewProvider | undefined, private readonly _showOptionButtons: boolean, options: ISwapInputOptions) {
 		super();
@@ -134,7 +113,6 @@ export class SwapInput extends Widget {
 		this.inputValidationErrorBackground = options.inputValidationErrorBackground;
 		this.inputValidationErrorForeground = options.inputValidationErrorForeground;
 
-		const appendPreserveCaseLabel = options.appendPreserveCaseLabel || '';
 		const appendWholeWordsLabel = options.appendWholeWordsLabel || '';
 		const history = options.history || [];
 		const flexibleHeight = !!options.flexibleHeight;
@@ -169,24 +147,6 @@ export class SwapInput extends Widget {
 			flexibleMaxHeight
 		}));
 
-		this.preserveCase = this._register(new PreserveCaseCheckbox({
-			appendTitle: appendPreserveCaseLabel,
-			isChecked: false,
-			inputActiveOptionBorder: this.inputActiveOptionBorder,
-			inputActiveOptionForeground: this.inputActiveOptionForeground,
-			inputActiveOptionBackground: this.inputActiveOptionBackground,
-		}));
-		this._register(this.preserveCase.onChange(viaKeyboard => {
-			this._onDidOptionChange.fire(viaKeyboard);
-			if (!viaKeyboard && this.fixFocusOnOptionClickEnabled) {
-				this.inputBox.focus();
-			}
-			this.validate();
-		}));
-		this._register(this.preserveCase.onKeyDown(e => {
-			this._onPreserveCaseKeyDown.fire(e);
-		}));
-
 		// 変更開始(2021/10/24)
 		this.wholeWords = this._register(new WholeWordsCheckbox({
 			appendTitle: appendWholeWordsLabel,
@@ -204,14 +164,14 @@ export class SwapInput extends Widget {
 		}));
 
 		if (this._showOptionButtons) {
-			this.cachedOptionsWidth = this.preserveCase.width();
+			this.cachedOptionsWidth = this.wholeWords.width();
 		} else {
 			this.cachedOptionsWidth = 0;
 		}
 
 		// Arrow-Key support to navigate between options
 		// ↓変更(2021/10/24)
-		let indexes = [this.preserveCase.domNode, this.wholeWords.domNode];
+		let indexes = [this.wholeWords.domNode];
 		this.onkeydown(this.domNode, (event: IKeyboardEvent) => {
 			if (event.equals(KeyCode.LeftArrow) || event.equals(KeyCode.RightArrow) || event.equals(KeyCode.Escape)) {
 				let index = indexes.indexOf(<HTMLElement>document.activeElement);
@@ -243,7 +203,6 @@ export class SwapInput extends Widget {
 		let controls = document.createElement('div');
 		controls.className = 'controls';
 		controls.style.display = this._showOptionButtons ? 'block' : 'none';
-		controls.appendChild(this.preserveCase.domNode);
 		// 変更開始(2021/10/24)
 		controls.appendChild(this.wholeWords.domNode);
 		// 変更終了
@@ -262,7 +221,6 @@ export class SwapInput extends Widget {
 	public enable(): void {
 		this.domNode.classList.remove('disabled');
 		this.inputBox.enable();
-		this.preserveCase.enable();
 		// ↓変更(2021/10/24)
 		this.wholeWords.enable();
 	}
@@ -270,7 +228,6 @@ export class SwapInput extends Widget {
 	public disable(): void {
 		this.domNode.classList.add('disabled');
 		this.inputBox.disable();
-		this.preserveCase.disable();
 		// ↓変更(2021/10/24)
 		this.wholeWords.disable();
 	}
@@ -335,7 +292,6 @@ export class SwapInput extends Widget {
 				inputActiveOptionForeground: this.inputActiveOptionForeground,
 				inputActiveOptionBackground: this.inputActiveOptionBackground,
 			};
-			this.preserveCase.style(checkBoxStyles);
 			// ↓変更(2021/10/24)
 			this.wholeWords.style(checkBoxStyles);
 
@@ -365,17 +321,6 @@ export class SwapInput extends Widget {
 		this.inputBox.focus();
 	}
 
-	public getPreserveCase(): boolean {
-		return this.preserveCase.checked;
-	}
-
-	public setPreserveCase(value: boolean): void {
-		this.preserveCase.checked = value;
-	}
-
-	public focusOnPreserve(): void {
-		this.preserveCase.focus();
-	}
 	// 変更開始(2021/10/24)
 	public getWholeWords(): boolean {
 		return this.wholeWords.checked;

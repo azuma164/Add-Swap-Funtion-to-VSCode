@@ -21,9 +21,9 @@ export class SwapAllCommand implements ICommand {
 	private readonly _ranges: Range[];
 	private readonly _replaceStrings: string[];
 
-	constructor(editorSelection: Selection, ranges1: Range[], swapStrings1: string[], ranges2: Range[], swapStrings2: string[]) {
-		let replaceStrings = swapStrings1.concat(swapStrings2);
-		let ranges = ranges1.concat(ranges2);
+	constructor(editorSelection: Selection, rangesForFindInput: Range[], swapStringsForFindInput: string[], rangesForSwapInput: Range[], swapStringsForSwapInput: string[]) {
+		let replaceStrings = swapStringsForFindInput.concat(swapStringsForSwapInput);
+		let ranges = rangesForFindInput.concat(rangesForSwapInput);
 
 		this._editorSelection = editorSelection;
 		this._ranges = ranges;
