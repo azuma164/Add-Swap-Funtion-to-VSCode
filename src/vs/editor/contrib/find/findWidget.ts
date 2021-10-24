@@ -1013,6 +1013,10 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		}
 
+		if (e.equals(KeyCode.Enter)) {
+			e.preventDefault();
+		}
+
 		if (e.equals(KeyCode.Tab)) {
 			this._replaceInput.focus();
 			e.preventDefault();
