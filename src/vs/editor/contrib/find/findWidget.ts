@@ -405,6 +405,11 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		if (e.wholeWord) {
 			this._findInput.setWholeWords(this._state.wholeWord);
 		}
+		// 変更開始(2021/10/24)
+		if (e.wholeWordForSwap) {
+			this._swapInput.setWholeWords(this._state.wholeWordForSwap);
+		}
+		// 変更終了
 		if (e.matchCase) {
 			this._findInput.setCaseSensitive(this._state.matchCase);
 		}
@@ -1253,12 +1258,14 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		actionsContainer.appendChild(this._closeBtn.domNode);
 
-		//変更開始(2021/10/21)もうちょい中身を見たい、、、
-		// Swap input
+		// 変更開始
+		// Swap Input
 		this._swapInput = this._register(new ContextScopedSwapInput(null, undefined, {
-			label: NLS_REPLACE_INPUT_LABEL,
-			placeholder: NLS_REPLACE_INPUT_PLACEHOLDER,
+			label: NLS_SWAP_INPUT_LABEL,
+			placeholder: NLS_SWAP_INPUT_PLACEHOLDER,
 			appendPreserveCaseLabel: this._keybindingLabelFor(FIND_IDS.TogglePreserveCaseCommand),
+			// ↓変更(2021/10/24)
+			appendWholeWordsLabel: this._keybindingLabelFor(FIND_IDS.ToggleWholeWordCommand),
 			history: [],
 			flexibleHeight,
 			flexibleWidth,
@@ -1266,6 +1273,8 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			showHistoryHint: () => showHistoryKeybindingHint(this._keybindingService)
 		}, this._contextKeyService, true));
 		this._swapInput.setPreserveCase(!!this._state.preserveCase);
+		// ↓変更(2021/10/24)
+		this._swapInput.setWholeWords(!!this._state.wholeWordForSwap);
 		this._register(this._swapInput.onKeyDown((e) => this._onSwapInputKeyDown(e)));
 		this._register(this._swapInput.inputBox.onDidChange(() => {
 			this._state.change({ swapString: this._swapInput.inputBox.value }, false);
@@ -1277,7 +1286,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}));
 		this._register(this._swapInput.onDidOptionChange(() => {
 			this._state.change({
-				preserveCase: this._swapInput.getPreserveCase()
+				preserveCase: this._swapInput.getPreserveCase(),
+				// ↓変更(2021/10/24)
+				wholeWordForSwap: this._swapInput.getWholeWords(),
 			}, true);
 		}));
 		this._register(this._swapInput.onPreserveCaseKeyDown((e) => {
@@ -1295,7 +1306,26 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				e.preventDefault();
 			}
 		}));
-		//変更終了
+
+		// Swap all button
+		this._swapAllBtn = this._register(new SimpleButton({
+			label: NLS_SWAP_ALL_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.SwapAllAction),
+			icon: findSwapAllIcon,
+			onTrigger: () => {
+				this._controller.swapAll();
+			}
+		}));
+
+		let swapPart = document.createElement('div');
+		swapPart.className = 'swap-part';
+		swapPart.appendChild(this._swapInput.domNode);
+
+		const swapActionsContainer = document.createElement('div');
+		swapActionsContainer.className = 'swap-actions';
+		swapPart.appendChild(swapActionsContainer);
+
+		swapActionsContainer.appendChild(this._swapAllBtn.domNode);
+		// 変更終了
 
 		// Replace input
 		this._replaceInput = this._register(new ContextScopedReplaceInput(null, undefined, {
@@ -1362,16 +1392,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				this._controller.replaceAll();
 			}
 		}));
-		// 変更開始
-		// Swap all button
-		this._swapAllBtn = this._register(new SimpleButton({
-			label: NLS_SWAP_ALL_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.SwapAllAction),
-			icon: findSwapAllIcon,
-			onTrigger: () => {
-				this._controller.swapAll();
-			}
-		}));
-		// 変更終了
 
 		let replacePart = document.createElement('div');
 		replacePart.className = 'replace-part';
@@ -1384,90 +1404,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		replaceActionsContainer.appendChild(this._replaceBtn.domNode);
 		replaceActionsContainer.appendChild(this._replaceAllBtn.domNode);
 
-
-
-		// 仮変更開始
-		// Swap Input
-		this._swapInput = this._register(new ContextScopedSwapInput(null, undefined, {
-			label: NLS_SWAP_INPUT_LABEL,
-			placeholder: NLS_SWAP_INPUT_PLACEHOLDER,
-			appendPreserveCaseLabel: this._keybindingLabelFor(FIND_IDS.TogglePreserveCaseCommand),
-			history: [],
-			flexibleHeight,
-			flexibleWidth,
-			flexibleMaxHeight: 118,
-			showHistoryHint: () => showHistoryKeybindingHint(this._keybindingService)
-		}, this._contextKeyService, true));
-		this._swapInput.setPreserveCase(!!this._state.preserveCase);
-		this._register(this._swapInput.onKeyDown((e) => this._onSwapInputKeyDown(e)));
-		// この下が悪さをしてるっぽい
-		this._register(this._swapInput.inputBox.onDidChange(() => {
-			this._state.change({ swapString: this._swapInput.inputBox.value }, false);
-		}));
-		//
-		this._register(this._swapInput.inputBox.onDidHeightChange((e) => {
-			if (this._isReplaceVisible && this._tryUpdateHeight()) {
-				this._showViewZone();
-			}
-		}));
-		this._register(this._swapInput.onDidOptionChange(() => {
-			this._state.change({
-				preserveCase: this._swapInput.getPreserveCase()
-			}, true);
-		}));
-		this._register(this._swapInput.onPreserveCaseKeyDown((e) => {
-			if (e.equals(KeyCode.Tab)) {
-				if (this._prevBtn.isEnabled()) {
-					this._prevBtn.focus();
-				} else if (this._nextBtn.isEnabled()) {
-					this._nextBtn.focus();
-				} else if (this._toggleSelectionFind.enabled) {
-					this._toggleSelectionFind.focus();
-				} else if (this._closeBtn.isEnabled()) {
-					this._closeBtn.focus();
-				}
-
-				e.preventDefault();
-			}
-		}));
-
-		// this._matchesCount = document.createElement('div');
-		// this._matchesCount.className = 'matchesCount';
-		// this._updateMatchesCount();
-
-		// // Previous button
-		// this._prevBtn = this._register(new SimpleButton({
-		// 	label: NLS_PREVIOUS_MATCH_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.PreviousMatchFindAction),
-		// 	icon: findPreviousMatchIcon,
-		// 	onTrigger: () => {
-		// 		this._codeEditor.getAction(FIND_IDS.PreviousMatchFindAction).run().then(undefined, onUnexpectedError);
-		// 	}
-		// }));
-
-		// // Next button
-		// this._nextBtn = this._register(new SimpleButton({
-		// 	label: NLS_NEXT_MATCH_BTN_LABEL + this._keybindingLabelFor(FIND_IDS.NextMatchFindAction),
-		// 	icon: findNextMatchIcon,
-		// 	onTrigger: () => {
-		// 		this._codeEditor.getAction(FIND_IDS.NextMatchFindAction).run().then(undefined, onUnexpectedError);
-		// 	}
-		// }));
-
-		let swapPart = document.createElement('div');
-		swapPart.className = 'swap-part';
-		swapPart.appendChild(this._swapInput.domNode);
-
-		const swapActionsContainer = document.createElement('div');
-		swapActionsContainer.className = 'swap-actions';
-		swapPart.appendChild(swapActionsContainer);
-
-		// 変更開始
-		swapActionsContainer.appendChild(this._swapAllBtn.domNode);
-		// 変更終了
-		// swapActionsContainer.appendChild(this._matchesCount);
-		// swapActionsContainer.appendChild(this._prevBtn.domNode);
-		// swapActionsContainer.appendChild(this._nextBtn.domNode);
-		// 仮変更終了
 		// Toggle replace button
 		this._toggleReplaceBtn = this._register(new SimpleButton({
 			label: NLS_TOGGLE_REPLACE_MODE_BTN_LABEL,
@@ -1496,9 +1432,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		this._domNode.appendChild(this._toggleReplaceBtn.domNode);
 		this._domNode.appendChild(findPart);
-		// 仮変更開始
+		// 変更開始
 		this._domNode.appendChild(swapPart);
-		// 仮変更終了
+		// 変更終了
 		this._domNode.appendChild(replacePart);
 
 		this._resizeSash = new Sash(this._domNode, this, { orientation: Orientation.VERTICAL, size: 2 });

@@ -522,7 +522,7 @@ export class FindModelBoundToEditorModel {
 			FindModelBoundToEditorModel._getSearchRange(this._editor.getModel(), scope)
 		);
 
-		return this._editor.getModel().findMatches(this._state.swapString, searchRanges, this._state.isRegex, this._state.matchCase, this._state.wholeWord ? this._editor.getOption(EditorOption.wordSeparators) : null, captureMatches, limitResultCount);
+		return this._editor.getModel().findMatches(this._state.swapString, searchRanges, false, this._state.matchCase, this._state.wholeWordForSwap ? this._editor.getOption(EditorOption.wordSeparators) : null, captureMatches, limitResultCount);
 	}
 	//変更終了
 

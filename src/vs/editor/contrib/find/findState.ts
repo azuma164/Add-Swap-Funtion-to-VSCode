@@ -21,6 +21,9 @@ export interface FindReplaceStateChangedEvent {
 	isReplaceRevealed: boolean;
 	isRegex: boolean;
 	wholeWord: boolean;
+	// 変更開始(2021/10/24)
+	wholeWordForSwap: boolean;
+	// 変更終了
 	matchCase: boolean;
 	preserveCase: boolean;
 	searchScope: boolean;
@@ -48,6 +51,10 @@ export interface INewFindReplaceState {
 	isRegexOverride?: FindOptionOverride;
 	wholeWord?: boolean;
 	wholeWordOverride?: FindOptionOverride;
+	// 変更開始(2021/10/24)
+	wholeWordForSwap?: boolean;
+	wholeWordOverrideForSwap?: FindOptionOverride;
+	// 変更終了
 	matchCase?: boolean;
 	matchCaseOverride?: FindOptionOverride;
 	preserveCase?: boolean;
@@ -78,6 +85,10 @@ export class FindReplaceState extends Disposable {
 	private _isRegexOverride: FindOptionOverride;
 	private _wholeWord: boolean;
 	private _wholeWordOverride: FindOptionOverride;
+	// 変更開始(2021/10/24)
+	private _wholeWordForSwap: boolean;
+	private _wholeWordOverrideForSwap: FindOptionOverride;
+	// 変更終了
 	private _matchCase: boolean;
 	private _matchCaseOverride: FindOptionOverride;
 	private _preserveCase: boolean;
@@ -98,11 +109,15 @@ export class FindReplaceState extends Disposable {
 	public get isReplaceRevealed(): boolean { return this._isReplaceRevealed; }
 	public get isRegex(): boolean { return effectiveOptionValue(this._isRegexOverride, this._isRegex); }
 	public get wholeWord(): boolean { return effectiveOptionValue(this._wholeWordOverride, this._wholeWord); }
+	// ↓変更(2021/10/24)
+	public get wholeWordForSwap(): boolean { return effectiveOptionValue(this._wholeWordOverrideForSwap, this._wholeWordForSwap); }
 	public get matchCase(): boolean { return effectiveOptionValue(this._matchCaseOverride, this._matchCase); }
 	public get preserveCase(): boolean { return effectiveOptionValue(this._preserveCaseOverride, this._preserveCase); }
 
 	public get actualIsRegex(): boolean { return this._isRegex; }
 	public get actualWholeWord(): boolean { return this._wholeWord; }
+	// ↓変更(2021/10/24)
+	public get actualWholeWordForSwap(): boolean { return this._wholeWordForSwap; }
 	public get actualMatchCase(): boolean { return this._matchCase; }
 	public get actualPreserveCase(): boolean { return this._preserveCase; }
 
@@ -125,6 +140,10 @@ export class FindReplaceState extends Disposable {
 		this._isRegexOverride = FindOptionOverride.NotSet;
 		this._wholeWord = false;
 		this._wholeWordOverride = FindOptionOverride.NotSet;
+		// 変更開始(2021/10/24)
+		this._wholeWordForSwap = false;
+		this._wholeWordOverrideForSwap = FindOptionOverride.NotSet;
+		// 変更終了
 		this._matchCase = false;
 		this._matchCaseOverride = FindOptionOverride.NotSet;
 		this._preserveCase = false;
@@ -149,6 +168,9 @@ export class FindReplaceState extends Disposable {
 			isReplaceRevealed: false,
 			isRegex: false,
 			wholeWord: false,
+			// 変更開始(2021/10/24)
+			wholeWordForSwap: false,
+			// 変更終了
 			matchCase: false,
 			preserveCase: false,
 			searchScope: false,
@@ -203,6 +225,8 @@ export class FindReplaceState extends Disposable {
 			isReplaceRevealed: false,
 			isRegex: false,
 			wholeWord: false,
+			// ↓変更(2021/10/24)
+			wholeWordForSwap: false,
 			matchCase: false,
 			preserveCase: false,
 			searchScope: false,
@@ -215,6 +239,8 @@ export class FindReplaceState extends Disposable {
 
 		const oldEffectiveIsRegex = this.isRegex;
 		const oldEffectiveWholeWords = this.wholeWord;
+		// ↓変更開始(2021/10/24)
+		const oldEffectiveWholeWordsForSwap = this.wholeWordForSwap;
 		const oldEffectiveMatchCase = this.matchCase;
 		const oldEffectivePreserveCase = this.preserveCase;
 
@@ -261,6 +287,11 @@ export class FindReplaceState extends Disposable {
 		if (typeof newState.wholeWord !== 'undefined') {
 			this._wholeWord = newState.wholeWord;
 		}
+		// 変更開始(2021/10/24)
+		if (typeof newState.wholeWordForSwap !== 'undefined') {
+			this._wholeWordForSwap = newState.wholeWordForSwap;
+		}
+		// 変更終了
 		if (typeof newState.matchCase !== 'undefined') {
 			this._matchCase = newState.matchCase;
 		}
@@ -288,6 +319,8 @@ export class FindReplaceState extends Disposable {
 		// Overrides get set when they explicitly come in and get reset anytime something else changes
 		this._isRegexOverride = (typeof newState.isRegexOverride !== 'undefined' ? newState.isRegexOverride : FindOptionOverride.NotSet);
 		this._wholeWordOverride = (typeof newState.wholeWordOverride !== 'undefined' ? newState.wholeWordOverride : FindOptionOverride.NotSet);
+		// ↓変更(2021/10/24)
+		this._wholeWordOverrideForSwap = (typeof newState.wholeWordOverrideForSwap !== 'undefined' ? newState.wholeWordOverrideForSwap : FindOptionOverride.NotSet);
 		this._matchCaseOverride = (typeof newState.matchCaseOverride !== 'undefined' ? newState.matchCaseOverride : FindOptionOverride.NotSet);
 		this._preserveCaseOverride = (typeof newState.preserveCaseOverride !== 'undefined' ? newState.preserveCaseOverride : FindOptionOverride.NotSet);
 
@@ -299,6 +332,12 @@ export class FindReplaceState extends Disposable {
 			somethingChanged = true;
 			changeEvent.wholeWord = true;
 		}
+		// 変更開始(2021/10/24)
+		if (oldEffectiveWholeWordsForSwap !== this.wholeWordForSwap) {
+			somethingChanged = true;
+			changeEvent.wholeWordForSwap = true;
+		}
+		// 変更終了
 		if (oldEffectiveMatchCase !== this.matchCase) {
 			somethingChanged = true;
 			changeEvent.matchCase = true;
