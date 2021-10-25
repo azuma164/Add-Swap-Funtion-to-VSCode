@@ -18,7 +18,7 @@ import { Selection } from 'vs/editor/common/core/selection';
 import { ICommand, ScrollType } from 'vs/editor/common/editorCommon';
 import { EndOfLinePreference, FindMatch, ITextModel } from 'vs/editor/common/model';
 import { SearchParams } from 'vs/editor/common/model/textModelSearch';
-import { FindDecorations } from 'vs/editor/contrib/find/findDecorations';
+import { FindDecorations, FindDecorationsForSwap } from 'vs/editor/contrib/find/findDecorations';
 import { FindReplaceState, FindReplaceStateChangedEvent } from 'vs/editor/contrib/find/findState';
 import { ReplaceAllCommand } from 'vs/editor/contrib/find/replaceAllCommand';
 // 変更開始
@@ -90,7 +90,7 @@ export class FindModelBoundToEditorModel {
 	private readonly _toDispose = new DisposableStore();
 	private readonly _decorations: FindDecorations;
 	// ↓変更(2021/10/25)
-	private readonly _decorationsForSwap: FindDecorations;
+	private readonly _decorationsForSwap: FindDecorationsForSwap;
 	private _ignoreModelContentChanged: boolean;
 	private readonly _startSearchingTimer: TimeoutTimer;
 
@@ -105,7 +105,7 @@ export class FindModelBoundToEditorModel {
 
 		this._decorations = new FindDecorations(editor);
 		// ↓変更(2021/10/25)
-		this._decorationsForSwap = new FindDecorations(editor);
+		this._decorationsForSwap = new FindDecorationsForSwap(editor);
 		this._toDispose.add(this._decorations);
 		// ↓変更(2021/10/25)
 		this._toDispose.add(this._decorationsForSwap);

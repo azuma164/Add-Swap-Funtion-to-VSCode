@@ -332,17 +332,20 @@ export const editorSelectionHighlightBorder = registerColor('editor.selectionHig
  * Editor find match colors.
  */
 export const editorFindMatch = registerColor('editor.findMatchBackground', { light: '#A8AC94', dark: '#515C6A', hc: null }, nls.localize('editorFindMatch', "Color of the current search match."));
-export const editorFindMatchHighlight = registerColor('editor.findMatchHighlightBackground', { light: '#00ffff', dark: '#00ffff', hc: '#00ffff' }, nls.localize('findMatchHighlight', "Color of the other search matches. The color must not be opaque so as not to hide underlying decorations."), true);
-export const editorFindRangeHighlight = registerColor('editor.findRangeHighlightBackground', { dark: '#00ffff', light: '#00ffff', hc: '#00ffff' }, nls.localize('findRangeHighlight', "Color of the range limiting the search. The color must not be opaque so as not to hide underlying decorations."), true);
+export const editorFindMatchHighlightForSwap = registerColor('editor.findMatchHighlightBackgroundForSwap', { light: '#d18616', dark: '#d18616', hc: '#AB5A00' }, nls.localize('findMatchHighlightForSwap', "Color of the other search matches. The color must not be opaque so as not to hide underlying decorations."), true);
+export const editorFindRangeHighlightForSwap = registerColor('editor.findRangeHighlightBackgroundForSwap', { dark: '#fff8dc', light: '#fff8dc', hc: null }, nls.localize('findRangeHighlightForSwap', "Color of the range limiting the search. The color must not be opaque so as not to hide underlying decorations."), true);
 
 //hennkou
-export const editorFindMatchHighlightForSwap = registerColor('editor.findMatchHighlightBackgroundForSwap', { light: '#EA5C0055', dark: '#EA5C0055', hc: null }, nls.localize('findMatchHighlightForSwap', "Color of the other search matches. The color must not be opaque so as not to hide underlying decorations."), true);
-export const editorFindRangeHighlightForSwap = registerColor('editor.findRangeHighlightBackgroundForSwap', { dark: '#3a3d4166', light: '#b4b4b44d', hc: null }, nls.localize('findRangeHighlightForSwap', "Color of the range limiting the search. The color must not be opaque so as not to hide underlying decorations."), true);
+export const editorFindMatchHighlight = registerColor('editor.findMatchHighlightBackground', { light: '#EA5C0055', dark: '#EA5C0055', hc: null }, nls.localize('findMatchHighlight', "Color of the other search matches. The color must not be opaque so as not to hide underlying decorations."), true);
+export const editorFindRangeHighlight = registerColor('editor.findRangeHighlightBackground', { dark: '#3a3d4166', light: '#b4b4b44d', hc: null }, nls.localize('findRangeHighlight', "Color of the range limiting the search. The color must not be opaque so as not to hide underlying decorations."), true);
 //hennkou
 
 
 export const editorFindMatchBorder = registerColor('editor.findMatchBorder', { light: null, dark: null, hc: activeContrastBorder }, nls.localize('editorFindMatchBorder', "Border color of the current search match."));
-export const editorFindMatchHighlightBorder = registerColor('editor.findMatchHighlightBorder', { light: '#00ffff', dark: '#00ffff', hc: activeContrastBorder }, nls.localize('findMatchHighlightBorder', "Border color of the other search matches."));
+export const editorFindMatchHighlightBorder = registerColor('editor.findMatchHighlightBorder', { light: null, dark: null, hc: activeContrastBorder }, nls.localize('findMatchHighlightBorder', "Border color of the other search matches."));
+//hennkou
+export const editorFindMatchHighlightBorderForSwap = registerColor('editor.findMatchHighlightBorderForSwap', { light: null, dark: null, hc: activeContrastBorder }, nls.localize('findMatchHighlightBorderForSwap', "Border color of the other search matches."));
+//
 export const editorFindRangeHighlightBorder = registerColor('editor.findRangeHighlightBorder', { dark: '#00ffff', light: '#00ffff', hc: transparent(activeContrastBorder, 0.4) }, nls.localize('findRangeHighlightBorder', "Border color of the range limiting the search. The color must not be opaque so as not to hide underlying decorations."), true);
 
 /**
@@ -366,7 +369,7 @@ export const editorHoverStatusBarBackground = registerColor('editorHoverWidget.s
  */
 export const editorActiveLinkForeground = registerColor('editorLink.activeForeground', { dark: '#4E94CE', light: Color.blue, hc: Color.cyan }, nls.localize('activeLinkForeground', 'Color of active links.'));
 
-/**
+/*
  * Inline hints
  */
 export const editorInlayHintForeground = registerColor('editorInlayHint.foreground', { dark: transparent(badgeForeground, .8), light: transparent(badgeForeground, .8), hc: badgeForeground }, nls.localize('editorInlayHintForeground', 'Foreground color of inline hints'));
