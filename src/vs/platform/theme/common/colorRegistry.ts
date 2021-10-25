@@ -321,8 +321,11 @@ export const keybindingLabelBottomBorder = registerColor('keybindingLabel.bottom
 /**
  * Editor selection colors.
  */
-export const editorSelectionBackground = registerColor('editor.selectionBackground', { light: '#00ffff', dark: '#00ffff', hc: '#00ffff' }, nls.localize('editorSelectionBackground', "Color of the editor selection."));
-export const editorSelectionForeground = registerColor('editor.selectionForeground', { light: '#00ffff', dark: '#00ffff', hc: '#00ffff' }, nls.localize('editorSelectionForeground', "Color of the selected text for high contrast."));
+export const editorSelectionBackground = registerColor('editor.selectionBackground', { light: '#ADD6FF', dark: '#264F78', hc: '#f3f518' }, nls.localize('editorSelectionBackground', "Color of the editor selection."));
+export const editorSelectionForeground = registerColor('editor.selectionForeground', { light: null, dark: null, hc: '#000000' }, nls.localize('editorSelectionForeground', "Color of the selected text for high contrast."));
+
+//export const editorSelectionBackground = registerColor('editor.selectionBackground', { light: '#00ffff', dark: '#00ffff', hc: '#00ffff' }, nls.localize('editorSelectionBackground', "Color of the editor selection."));
+//export const editorSelectionForeground = registerColor('editor.selectionForeground', { light: '#00ffff', dark: '#00ffff', hc: '#00ffff' }, nls.localize('editorSelectionForeground', "Color of the selected text for high contrast."));
 export const editorInactiveSelection = registerColor('editor.inactiveSelectionBackground', { light: transparent(editorSelectionBackground, 0.5), dark: transparent(editorSelectionBackground, 0.5), hc: transparent(editorSelectionBackground, 0.5) }, nls.localize('editorInactiveSelection', "Color of the selection in an inactive editor. The color must not be opaque so as not to hide underlying decorations."), true);
 export const editorSelectionHighlight = registerColor('editor.selectionHighlightBackground', { light: lessProminent(editorSelectionBackground, editorBackground, 0.3, 0.6), dark: lessProminent(editorSelectionBackground, editorBackground, 0.3, 0.6), hc: null }, nls.localize('editorSelectionHighlight', 'Color for regions with the same content as the selection. The color must not be opaque so as not to hide underlying decorations.'), true);
 export const editorSelectionHighlightBorder = registerColor('editor.selectionHighlightBorder', { light: null, dark: null, hc: activeContrastBorder }, nls.localize('editorSelectionHighlightBorder', "Border color for regions with the same content as the selection."));
