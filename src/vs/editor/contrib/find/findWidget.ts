@@ -147,9 +147,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _cachedHeight: number | null = null;
 	private _findInput!: FindInput;
 	private _replaceInput!: ReplaceInput;
-	// 仮変更開始
+	// 変更開始
 	private _swapInput!: SwapInput;
-	// 仮変更終了
+	// 変更終了
 
 	private _toggleReplaceBtn!: SimpleButton;
 	private _matchesCount!: HTMLElement;
