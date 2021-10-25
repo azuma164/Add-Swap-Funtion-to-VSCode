@@ -12,9 +12,7 @@ import { Checkbox } from 'vs/base/browser/ui/checkbox/checkbox';
 import { IContextViewProvider } from 'vs/base/browser/ui/contextview/contextview';
 import { FindInput, IFindInputStyles } from 'vs/base/browser/ui/findinput/findInput';
 import { ReplaceInput } from 'vs/base/browser/ui/findinput/replaceInput';
-//変更開始
 import { SwapInput } from 'vs/base/browser/ui/findinput/swapInput';
-//変更終了
 import { IMessage as InputBoxMessage } from 'vs/base/browser/ui/inputbox/inputBox';
 import { ISashEvent, IVerticalSashLayoutProvider, Orientation, Sash } from 'vs/base/browser/ui/sash/sash';
 import { Widget } from 'vs/base/browser/ui/widget';
@@ -34,7 +32,6 @@ import { CONTEXT_FIND_INPUT_FOCUSED, CONTEXT_REPLACE_INPUT_FOCUSED, CONTEXT_SWAP
 import { FindReplaceState, FindReplaceStateChangedEvent } from 'vs/editor/contrib/find/findState';
 import * as nls from 'vs/nls';
 import { AccessibilitySupport } from 'vs/platform/accessibility/common/accessibility';
-//変更↓(swap追加)
 import { ContextScopedFindInput, ContextScopedReplaceInput, ContextScopedSwapInput } from 'vs/platform/browser/contextScopedHistoryWidget';
 import { showHistoryKeybindingHint } from 'vs/platform/browser/historyWidgetKeybindingHint';
 import { IContextKey, IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
@@ -51,18 +48,14 @@ const findExpandedIcon = registerIcon('find-expanded', Codicon.chevronDown, nls.
 
 export const findReplaceIcon = registerIcon('find-replace', Codicon.replace, nls.localize('findReplaceIcon', 'Icon for \'Replace\' in the editor find widget.'));
 export const findReplaceAllIcon = registerIcon('find-replace-all', Codicon.replaceAll, nls.localize('findReplaceAllIcon', 'Icon for \'Replace All\' in the editor find widget.'));
-//変更開始(10/19 3限)
 export const findSwapAllIcon = registerIcon('find-swap-all', Codicon.swapAll, nls.localize('findSwapAllIcon', 'Icon for \'Swap All\' in the editor find widget.'));
-//変更終了
 export const findPreviousMatchIcon = registerIcon('find-previous-match', Codicon.arrowUp, nls.localize('findPreviousMatchIcon', 'Icon for \'Find Previous\' in the editor find widget.'));
 export const findNextMatchIcon = registerIcon('find-next-match', Codicon.arrowDown, nls.localize('findNextMatchIcon', 'Icon for \'Find Next\' in the editor find widget.'));
 
 export interface IFindController {
 	replace(): void;
 	replaceAll(): void;
-	// 変更開始
 	swapAll(): void;
-	// 変更終了
 	getGlobalBufferTerm(): Promise<string>;
 }
 
@@ -76,11 +69,9 @@ const NLS_REPLACE_INPUT_LABEL = nls.localize('label.replace', "Replace");
 const NLS_REPLACE_INPUT_PLACEHOLDER = nls.localize('placeholder.replace', "Replace");
 const NLS_REPLACE_BTN_LABEL = nls.localize('label.replaceButton', "Replace");
 const NLS_REPLACE_ALL_BTN_LABEL = nls.localize('label.replaceAllButton', "Replace All");
-// 変更開始
 const NLS_SWAP_INPUT_LABEL = nls.localize('label.swap', "Swap");
 const NLS_SWAP_INPUT_PLACEHOLDER = nls.localize('placeholder.swap', "Swap");
 const NLS_SWAP_ALL_BTN_LABEL = nls.localize('label.swapAllButton', "Swap All");
-// 変更終了
 const NLS_TOGGLE_REPLACE_MODE_BTN_LABEL = nls.localize('label.toggleReplaceButton', "Toggle Replace");
 const NLS_MATCHES_COUNT_LIMIT_TITLE = nls.localize('title.matchesCountLimit', "Only the first {0} results are highlighted, but all find operations work on the entire text.", MATCHES_LIMIT);
 export const NLS_MATCHES_LOCATION = nls.localize('label.matchesLocation', "{0} of {1}");
@@ -95,9 +86,7 @@ let MAX_MATCHES_COUNT_WIDTH = 69;
 
 const FIND_INPUT_AREA_HEIGHT = 33; // The height of Find Widget when Replace Input is not visible.
 const ctrlEnterReplaceAllWarningPromptedKey = 'ctrlEnterReplaceAll.windows.donotask';
-//変更開始(2021/10/21)
 const ctrlEnterSwapAllWarningPromptedKey = 'ctrlEnterSwapAll.windows.donotask';
-//変更終了
 
 const ctrlKeyMod = (platform.isMacintosh ? KeyMod.WinCtrl : KeyMod.CtrlCmd);
 export class FindWidgetViewZone implements IViewZone {
@@ -147,9 +136,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _cachedHeight: number | null = null;
 	private _findInput!: FindInput;
 	private _replaceInput!: ReplaceInput;
-	// 変更開始
 	private _swapInput!: SwapInput;
-	// 変更終了
 
 	private _toggleReplaceBtn!: SimpleButton;
 	private _matchesCount!: HTMLElement;
@@ -159,26 +146,20 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _closeBtn!: SimpleButton;
 	private _replaceBtn!: SimpleButton;
 	private _replaceAllBtn!: SimpleButton;
-	//変更開始
 	private _swapAllBtn!: SimpleButton;
-	//変更終了
 
 	private _isVisible: boolean;
 	private _isReplaceVisible: boolean;
 	private _ignoreChangeEvent: boolean;
 	private _ctrlEnterReplaceAllWarningPrompted: boolean;
-	//変更開始(2021/10/21)
 	private _ctrlEnterSwapAllWarningPrompted: boolean;
-	//変更終了
 
 	private readonly _findFocusTracker: dom.IFocusTracker;
 	private readonly _findInputFocused: IContextKey<boolean>;
 	private readonly _replaceFocusTracker: dom.IFocusTracker;
 	private readonly _replaceInputFocused: IContextKey<boolean>;
-	//仮変更開始(2021/10/21)
 	private readonly _swapFocusTracker: dom.IFocusTracker;
 	private readonly _swapInputFocused: IContextKey<boolean>;
-	//仮変更終了
 	private _viewZone?: FindWidgetViewZone;
 	private _viewZoneId?: string;
 
@@ -208,9 +189,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._notificationService = notificationService;
 
 		this._ctrlEnterReplaceAllWarningPrompted = !!storageService.getBoolean(ctrlEnterReplaceAllWarningPromptedKey, StorageScope.GLOBAL);
-		//変更開始(2021/10/21)
 		this._ctrlEnterSwapAllWarningPrompted = !!storageService.getBoolean(ctrlEnterSwapAllWarningPromptedKey, StorageScope.GLOBAL);
-		//変更開始
 
 		this._isVisible = false;
 		this._isReplaceVisible = false;
@@ -286,7 +265,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			this._replaceInputFocused.set(false);
 		}));
 
-		//変更開始(2021/10/21)
 		this._swapInputFocused = CONTEXT_SWAP_INPUT_FOCUSED.bindTo(contextKeyService);
 		this._swapFocusTracker = this._register(dom.trackFocus(this._swapInput.inputBox.inputElement));
 		this._register(this._swapFocusTracker.onDidFocus(() => {
@@ -296,7 +274,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._register(this._swapFocusTracker.onDidBlur(() => {
 			this._swapInputFocused.set(false);
 		}));
-		//変更終了
 
 		this._codeEditor.addOverlayWidget(this);
 		if (this._codeEditor.getOption(EditorOption.find).addExtraSpaceOnTop) {
@@ -361,12 +338,10 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		if (e.replaceString) {
 			this._replaceInput.inputBox.value = this._state.replaceString;
 		}
-		//変更開始(takahara)
 		if (e.swapString) {
 			this._swapInput.inputBox.value = this._state.swapString;
 			this._updateButtons();
 		}
-		//変更終了
 		if (e.isRevealed) {
 			if (this._state.isRevealed) {
 				this._reveal();
@@ -379,14 +354,10 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				if (!this._codeEditor.getOption(EditorOption.readOnly) && !this._isReplaceVisible) {
 					this._isReplaceVisible = true;
 					this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
-					// 仮変更開始
 					this._swapInput.width = dom.getTotalWidth(this._swapInput.domNode);
-					// 仮変更終了
 					this._updateButtons();
 					this._replaceInput.inputBox.layout();
-					// 仮変更開始
 					this._swapInput.inputBox.layout();
-					// 仮変更終了
 				}
 			} else {
 				if (this._isReplaceVisible) {
@@ -408,11 +379,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		if (e.wholeWord) {
 			this._findInput.setWholeWords(this._state.wholeWord);
 		}
-		// 変更開始(2021/10/24)
 		if (e.wholeWordForSwap) {
 			this._swapInput.setWholeWords(this._state.wholeWordForSwap);
 		}
-		// 変更終了
 		if (e.matchCase) {
 			this._findInput.setCaseSensitive(this._state.matchCase);
 			this._updateButtons();
@@ -457,11 +426,9 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		if (this._state.replaceString) {
 			this._replaceInput.inputBox.addToHistory();
 		}
-		//変更開始
 		if (this._state.swapString) {
 			this._swapInput.inputBox.addToHistory();
 		}
-		//変更終了
 	}
 
 	private _updateMatchesCount(): void {
@@ -539,23 +506,18 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 	private _updateButtons(): void {
 		this._findInput.setEnabled(this._isVisible);
 		this._replaceInput.setEnabled(this._isVisible && this._isReplaceVisible);
-		// 仮変更開始
 		this._swapInput.setEnabled(this._isVisible && this._isReplaceVisible);
-		// 仮変更終了
 		this._updateToggleSelectionFindButton();
 		this._closeBtn.setEnabled(this._isVisible);
 
 		let findInputIsNonEmpty = (this._state.searchString.length > 0);
-		// ↓変更(2021/10/24)
 		let swapInputIsNonEmpty = (this._state.swapString.length > 0);
 		let matchesCount = this._state.matchesCount ? true : false;
 		this._prevBtn.setEnabled(this._isVisible && findInputIsNonEmpty && matchesCount && this._state.canNavigateBack());
 		this._nextBtn.setEnabled(this._isVisible && findInputIsNonEmpty && matchesCount && this._state.canNavigateForward());
 		this._replaceBtn.setEnabled(this._isVisible && this._isReplaceVisible && findInputIsNonEmpty);
 		this._replaceAllBtn.setEnabled(this._isVisible && this._isReplaceVisible && findInputIsNonEmpty);
-		// 変更開始(2021/10/19)
 		this._swapAllBtn.setEnabled(this._isVisible && this._isReplaceVisible && findInputIsNonEmpty && swapInputIsNonEmpty && !this._state.isRegex && this._state.matchCase);
-		// 変更終了(2021/10/19)
 
 		this._domNode.classList.toggle('replaceToggled', this._isReplaceVisible);
 		this._toggleReplaceBtn.setExpanded(this._isReplaceVisible);
@@ -772,9 +734,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		};
 		this._findInput.style(inputStyles);
 		this._replaceInput.style(inputStyles);
-		// 仮変更開始
 		this._swapInput.style(inputStyles);
-		// 仮変更終了
 		this._toggleSelectionFind.style(inputStyles);
 	}
 
@@ -811,9 +771,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				// as the widget is resized by users, we may need to change the max width of the widget as the editor width changes.
 				this._domNode.style.maxWidth = `${editorWidth - 28 - minimapWidth - 15}px`;
 				this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
-				// 仮変更開始
 				this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
-				// 仮変更終了
 				return;
 			}
 		}
@@ -841,15 +799,11 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			let findInputWidth = this._findInput.inputBox.element.clientWidth;
 			if (findInputWidth > 0) {
 				this._replaceInput.width = findInputWidth;
-				// 仮変更開始
 				this._swapInput.width = findInputWidth;
-				// 仮変更終了
 			}
 		} else if (this._isReplaceVisible) {
 			this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
-			// 仮変更開始
 			this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
-			// 仮変更終了
 		}
 	}
 
@@ -867,10 +821,10 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			totalheight += 4;
 
 			totalheight += this._replaceInput.inputBox.height + 2 /** input box border */;
-			// 仮変更開始
+
 			totalheight += 4;
+
 			totalheight += this._swapInput.inputBox.height + 2;
-			// 仮変更終了
 		}
 		// margin bottom
 		totalheight += 4;
@@ -903,13 +857,11 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		this._replaceInput.focus();
 	}
 
-	//変更開始(2021/10/21)
 	public focusSwapInput(): void {
 		this._swapInput.select();
 		// Edge browser requires focus() in addition to select()
 		this._swapInput.focus();
 	}
-	//変更終了
 
 	public highlightFindOptions(): void {
 		this._findInput.highlightFindOptions();
@@ -966,7 +918,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		if (e.equals(KeyCode.Tab)) {
 			if (this._isReplaceVisible) {
-				//変更(replace→swap)
 				this._swapInput.focus();
 			} else {
 				this._findInput.focusOnCaseSensitive();
@@ -990,7 +941,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}
 	}
 
-	//変更開始(2021/10/21)
 	private _onSwapInputKeyDown(e: IKeyboardEvent): void {
 		if (e.equals(ctrlKeyMod | KeyCode.Enter)) {
 			if (this._keybindingService.dispatchEvent(e, e.target)) {
@@ -1044,7 +994,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			return stopPropagationForMultiLineDownwards(e, this._swapInput.inputBox.value, this._swapInput.inputBox.element.querySelector('textarea'));
 		}
 	}
-	//変更終了
 
 	private _onReplaceInputKeyDown(e: IKeyboardEvent): void {
 		if (e.equals(ctrlKeyMod | KeyCode.Enter)) {
@@ -1076,7 +1025,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}
 
 		if (e.equals(KeyMod.Shift | KeyCode.Tab)) {
-			//変更(find→swap)
 			this._swapInput.focus();
 			e.preventDefault();
 			return;
@@ -1270,12 +1218,10 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		actionsContainer.appendChild(this._closeBtn.domNode);
 
-		// 変更開始
 		// Swap Input
 		this._swapInput = this._register(new ContextScopedSwapInput(null, undefined, {
 			label: NLS_SWAP_INPUT_LABEL,
 			placeholder: NLS_SWAP_INPUT_PLACEHOLDER,
-			// ↓変更(2021/10/24)
 			appendWholeWordsLabel: this._keybindingLabelFor(FIND_IDS.ToggleWholeWordCommand),
 			history: [],
 			flexibleHeight,
@@ -1283,7 +1229,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			flexibleMaxHeight: 118,
 			showHistoryHint: () => showHistoryKeybindingHint(this._keybindingService)
 		}, this._contextKeyService, true));
-		// ↓変更(2021/10/24)
 		this._swapInput.setWholeWords(!!this._state.wholeWordForSwap);
 		this._register(this._swapInput.onKeyDown((e) => this._onSwapInputKeyDown(e)));
 		this._register(this._swapInput.inputBox.onDidChange(() => {
@@ -1304,7 +1249,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		}));
 		this._register(this._swapInput.onDidOptionChange(() => {
 			this._state.change({
-				// ↓変更(2021/10/24)
 				wholeWordForSwap: this._swapInput.getWholeWords(),
 			}, true);
 		}));
@@ -1337,7 +1281,6 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 		swapPart.appendChild(swapActionsContainer);
 
 		swapActionsContainer.appendChild(this._swapAllBtn.domNode);
-		// 変更終了
 
 		// Replace input
 		this._replaceInput = this._register(new ContextScopedReplaceInput(null, undefined, {
@@ -1425,10 +1368,8 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 				if (this._isReplaceVisible) {
 					this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
 					this._replaceInput.inputBox.layout();
-					// 仮変更開始
 					this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
 					this._swapInput.inputBox.layout();
-					// 仮変更終了
 				}
 				this._showViewZone();
 			}
@@ -1444,9 +1385,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 
 		this._domNode.appendChild(this._toggleReplaceBtn.domNode);
 		this._domNode.appendChild(findPart);
-		// 変更開始
 		this._domNode.appendChild(swapPart);
-		// 変更終了
 		this._domNode.appendChild(replacePart);
 
 		this._resizeSash = new Sash(this._domNode, this, { orientation: Orientation.VERTICAL, size: 2 });
@@ -1473,9 +1412,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			this._domNode.style.width = `${width}px`;
 			if (this._isReplaceVisible) {
 				this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
-				// 仮変更開始
 				this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
-				// 仮変更終了
 			}
 
 			this._findInput.inputBox.layout();
@@ -1509,9 +1446,7 @@ export class FindWidget extends Widget implements IOverlayWidget, IVerticalSashL
 			this._domNode.style.width = `${width}px`;
 			if (this._isReplaceVisible) {
 				this._replaceInput.width = dom.getTotalWidth(this._findInput.domNode);
-				// 仮変更開始
 				this._swapInput.width = dom.getTotalWidth(this._findInput.domNode);
-				// 仮変更終了
 			}
 
 			this._findInput.inputBox.layout();
@@ -1637,8 +1572,6 @@ registerThemingParticipant((theme, collector) => {
 
 	addBackgroundColorRule('.findMatch', theme.getColor(editorFindMatchHighlight));
 	addBackgroundColorRule('.findMatchForSwap', theme.getColor(editorFindMatchHighlightForSwap));
-	//hennkou
-	//	addBackgroundColorRule('.findMatch', theme.getColor(editorFindMatchHighlight));
 	addBackgroundColorRule('.currentFindMatch', theme.getColor(editorFindMatch));
 	addBackgroundColorRule('.findScope', theme.getColor(editorFindRangeHighlight));
 
@@ -1654,12 +1587,11 @@ registerThemingParticipant((theme, collector) => {
 	if (findMatchHighlightBorder) {
 		collector.addRule(`.monaco-editor .findMatch { border: 1px ${theme.type === 'hc' ? 'dotted' : 'solid'} ${findMatchHighlightBorder}; box-sizing: border-box; }`);
 	}
-	//仮変更
+
 	const findMatchHighlightBorderForSwap = theme.getColor(editorFindMatchHighlightBorderForSwap);
 	if (findMatchHighlightBorderForSwap) {
 		collector.addRule(`.monaco-editor .findMatchForSwap { border: 1px ${theme.type === 'hc' ? 'dotted' : 'solid'} ${findMatchHighlightBorderForSwap}; box-sizing: border-box; }`);
 	}
-	//仮変更終了
 
 	const findMatchBorder = theme.getColor(editorFindMatchBorder);
 	if (findMatchBorder) {

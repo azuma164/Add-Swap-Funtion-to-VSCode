@@ -353,10 +353,6 @@ export class FindDecorations implements IDisposable {
 	});
 }
 
-
-
-
-
 export class FindDecorationsForSwap implements IDisposable {
 
 	private readonly _editor: IActiveCodeEditor;
@@ -642,9 +638,6 @@ export class FindDecorationsForSwap implements IDisposable {
 		}
 	});
 
-
-
-	//仮変更
 	public static readonly _FIND_MATCH_FOR_SWAP_DECORATION = ModelDecorationOptions.register({
 		description: 'find-match',
 		stickiness: TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
@@ -660,7 +653,6 @@ export class FindDecorationsForSwap implements IDisposable {
 			position: MinimapPosition.Inline
 		}
 	});
-	//変更終了箇所
 
 	public static readonly _FIND_MATCH_NO_OVERVIEW_DECORATION = ModelDecorationOptions.register({
 		description: 'find-match-no-overview',

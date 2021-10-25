@@ -7,9 +7,7 @@ import { IHistoryNavigationWidget } from 'vs/base/browser/history';
 import { IContextViewProvider } from 'vs/base/browser/ui/contextview/contextview';
 import { FindInput, IFindInputOptions } from 'vs/base/browser/ui/findinput/findInput';
 import { IReplaceInputOptions, ReplaceInput } from 'vs/base/browser/ui/findinput/replaceInput';
-//変更開始(2021/10/21)
 import { ISwapInputOptions, SwapInput } from 'vs/base/browser/ui/findinput/swapInput';
-//変更終了
 import { HistoryInputBox, IHistoryInputOptions } from 'vs/base/browser/ui/inputbox/inputBox';
 import { KeyCode, KeyMod } from 'vs/base/common/keyCodes';
 import { ContextKeyExpr, IContextKey, IContextKeyService, IContextKeyServiceTarget, RawContextKey } from 'vs/platform/contextkey/common/contextkey';
@@ -90,7 +88,6 @@ export class ContextScopedReplaceInput extends ReplaceInput {
 
 }
 
-//変更開始(2021/10/21)
 export class ContextScopedSwapInput extends SwapInput {
 
 	constructor(container: HTMLElement | null, contextViewProvider: IContextViewProvider | undefined, options: ISwapInputOptions,
@@ -101,7 +98,6 @@ export class ContextScopedSwapInput extends SwapInput {
 	}
 
 }
-//変更終了
 
 KeybindingsRegistry.registerCommandAndKeybindingRule({
 	id: 'history.showPrevious',

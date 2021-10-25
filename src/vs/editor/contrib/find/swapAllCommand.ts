@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-//変更開始
 import { Range } from 'vs/editor/common/core/range';
 import { Selection } from 'vs/editor/common/core/selection';
 import { ICommand, ICursorStateComputerData, IEditOperationBuilder } from 'vs/editor/common/editorCommon';
@@ -74,5 +73,3 @@ export class SwapAllCommand implements ICommand {
 		return helper.getTrackedSelection(this._trackedEditorSelectionId!);
 	}
 }
-
-// 変更終了

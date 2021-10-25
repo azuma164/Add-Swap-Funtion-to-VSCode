@@ -29,11 +29,9 @@
 	display: flex;
 }
 
-/* 変更開始(2021/10/20, 追記 2021/10/22) */
 .monaco-editor .find-widget.swapToggled > .swap-part {
 	display: flex;
 }
-/* 変更終了 */
 
 .monaco-editor .find-widget.visible  {
 	transform: translateY(0);
@@ -60,34 +58,28 @@
 	display: flex;
 }
 
-/* 変更開始(2021/10/20) */
 .monaco-editor .find-widget > .swap-part {
 	margin: 4px 0 0 17px;
 	font-size: 12px;
 	display: flex;
 }
-/* 変更終了 */
 
 .monaco-editor .find-widget > .find-part .monaco-inputbox,
 .monaco-editor .find-widget > .replace-part .monaco-inputbox {
 	min-height: 25px;
 }
 
-/* 変更開始(2021/10/20,追記 2021/10/22) */
 .monaco-editor .find-widget > .swap-part .monaco-inputbox {
 	min-height: 25px;
 }
-/* 変更終了 */
 
 .monaco-editor .find-widget > .replace-part .monaco-inputbox > .ibwrapper > .mirror {
 	padding-right: 22px;
 }
 
-/* 変更開始(2021/10/20)　*/
 .monaco-editor .find-widget > .swap-part .monaco-inputbox > .ibwrapper > .mirror {
 	padding-right: 22px;
 }
-/* 変更終了 */
 
 .monaco-editor .find-widget > .find-part .monaco-inputbox > .ibwrapper > .input,
 .monaco-editor .find-widget > .find-part .monaco-inputbox > .ibwrapper > .mirror,
@@ -97,13 +89,11 @@
 	padding-bottom: 2px;
 }
 
-/* 変更開始(2021/10/20)　*/
 .monaco-editor .find-widget > .swap-part .monaco-inputbox > .ibwrapper > .input,
 .monaco-editor .find-widget > .swap-part .monaco-inputbox > .ibwrapper > .mirror {
 	padding-top: 2px;
 	padding-bottom: 2px;
 }
-/* 変更終了 */
 
 .monaco-editor .find-widget > .find-part .find-actions {
 	height: 25px;
@@ -117,13 +107,11 @@
 	align-items: center;
 }
 
-/* 変更開始(2021/10/20)　*/
 .monaco-editor .find-widget > .swap-part .swap-actions {
 	height: 25px;
 	display: flex;
 	align-items: center;
 }
-/* 変更終了 */
 
 .monaco-editor .find-widget .monaco-findInput {
 	vertical-align: middle;
@@ -226,7 +214,6 @@
 	right: 2px;
 }
 
-/* 変更開始(2021/10/20)　*/
 .monaco-editor .find-widget > .swap-part > .monaco-findInput {
 	position: relative;
 	display: flex;
@@ -241,7 +228,6 @@
 	top: 3px;
 	right: 2px;
 }
-/* 変更終了 */
 
 /* REDUCED */
 .monaco-editor .find-widget.reduced-find-widget .matchesCount {

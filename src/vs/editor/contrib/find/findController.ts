@@ -58,9 +58,7 @@ export const enum FindStartFocusAction {
 	NoFocusChange,
 	FocusFindInput,
 	FocusReplaceInput,
-	//変更開始(2021/10/22)
 	FocusSwapInput,
-	//変更終了
 }
 
 export interface IFindStartOptions {
@@ -199,15 +197,13 @@ export class CommonFindController extends Disposable implements IEditorContribut
 		return !!CONTEXT_FIND_INPUT_FOCUSED.getValue(this._contextKeyService);
 	}
 
-	//変更開始(2021/10/21)
-	public isSwapInputFocused(): boolean {
-		return !!CONTEXT_SWAP_INPUT_FOCUSED.getValue(this._contextKeyService);
-	}
-
 	public isReplaceInputFocused(): boolean {
 		return !!CONTEXT_REPLACE_INPUT_FOCUSED.getValue(this._contextKeyService);
 	}
-	//変更終了
+
+	public isSwapInputFocused(): boolean {
+		return !!CONTEXT_SWAP_INPUT_FOCUSED.getValue(this._contextKeyService);
+	}
 
 	public getState(): FindReplaceState {
 		return this._state;
@@ -386,17 +382,6 @@ export class CommonFindController extends Disposable implements IEditorContribut
 		return false;
 	}
 
-	// //変更開始
-	// public swap(): boolean {
-	// 	if (this._model) {
-	// 		this._model.swap();
-	// 		return true;
-	// 	}
-	// 	return false;
-	// }
-	// //変更終わり
-
-	//変更開始
 	public swapAll(): boolean {
 		if (this._model) {
 			this._model.swapAll();
@@ -404,7 +389,6 @@ export class CommonFindController extends Disposable implements IEditorContribut
 		}
 		return false;
 	}
-	//変更終わり
 
 	public selectAllMatches(): boolean {
 		if (this._model) {
@@ -489,9 +473,8 @@ export class FindController extends CommonFindController implements IFindControl
 				this._widget.focusReplaceInput();
 			} else if (opts.shouldFocus === FindStartFocusAction.FocusFindInput) {
 				this._widget.focusFindInput();
-			} else if (opts.shouldFocus === FindStartFocusAction.FocusSwapInput) { //変更開始
+			} else if (opts.shouldFocus === FindStartFocusAction.FocusSwapInput) {
 				this._widget.focusSwapInput();
-				//変更終了
 			}
 		}
 	}
@@ -778,11 +761,8 @@ StartFindReplaceAction.addImplementation(0, (accessor: ServicesAccessor, editor:
 
 	const currentSelection = editor.getSelection();
 	const findInputFocused = controller.isFindInputFocused();
-
-	//変更開始(2021/10/22)
-	// const replaceInputFocused = controller.isReplaceInputFocused();
 	const swapInputFocused = controller.isSwapInputFocused();
-	//変更終了
+
 
 
 	// we only seed search string from selection when the current selection is single line and not empty,
@@ -792,7 +772,6 @@ StartFindReplaceAction.addImplementation(0, (accessor: ServicesAccessor, editor:
 		&& (editor.getOption(EditorOption.find).seedSearchStringFromSelection !== 'never')
 		&& !findInputFocused;
 
-	//変更開始(コメントアウトが元の処理)
 	/*
 	* if the existing search string in find widget is empty and we don't seed search string from selection, it means the Find Input is still empty, so we should focus the Find Input instead of Replace Input.
 
@@ -800,13 +779,9 @@ StartFindReplaceAction.addImplementation(0, (accessor: ServicesAccessor, editor:
 	* findInputFocused false, seedSearchStringFromSelection true FocusReplaceInput
 	* findInputFocused false seedSearchStringFromSelection false FocusFindInput
 	*/
-	// const shouldFocus = (findInputFocused || seedSearchStringFromSelection) ?
-	// FindStartFocusAction.FocusReplaceInput : FindStartFocusAction.FocusFindInput;
-
 	const shouldFocus = (findInputFocused || seedSearchStringFromSelection) ?
 		FindStartFocusAction.FocusSwapInput : ((swapInputFocused) ?
 			FindStartFocusAction.FocusReplaceInput : FindStartFocusAction.FocusFindInput);
-	//変更終了
 
 	return controller.start({
 		forceRevealReplace: true,
@@ -970,7 +945,6 @@ registerEditorCommand(new FindCommand({
 	}
 }));
 
-//変更開始
 registerEditorCommand(new FindCommand({
 	id: FIND_IDS.SwapAllAction,
 	precondition: CONTEXT_FIND_WIDGET_VISIBLE,
@@ -981,4 +955,3 @@ registerEditorCommand(new FindCommand({
 		primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.Enter
 	}
 }));
-//変更終了

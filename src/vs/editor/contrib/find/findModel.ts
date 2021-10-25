@@ -21,9 +21,7 @@ import { SearchParams } from 'vs/editor/common/model/textModelSearch';
 import { FindDecorations, FindDecorationsForSwap } from 'vs/editor/contrib/find/findDecorations';
 import { FindReplaceState, FindReplaceStateChangedEvent } from 'vs/editor/contrib/find/findState';
 import { ReplaceAllCommand } from 'vs/editor/contrib/find/replaceAllCommand';
-// 変更開始
 import { SwapAllCommand } from 'vs/editor/contrib/find/swapAllCommand';
-// 変更終了
 import { parseReplaceString, ReplacePattern } from 'vs/editor/contrib/find/replacePattern';
 import { RawContextKey } from 'vs/platform/contextkey/common/contextkey';
 import { IKeybindings } from 'vs/platform/keybinding/common/keybindingsRegistry';
@@ -33,9 +31,7 @@ export const CONTEXT_FIND_WIDGET_NOT_VISIBLE = CONTEXT_FIND_WIDGET_VISIBLE.toNeg
 // Keep ContextKey use of 'Focussed' to not break when clauses
 export const CONTEXT_FIND_INPUT_FOCUSED = new RawContextKey<boolean>('findInputFocussed', false);
 export const CONTEXT_REPLACE_INPUT_FOCUSED = new RawContextKey<boolean>('replaceInputFocussed', false);
-//変更開始
 export const CONTEXT_SWAP_INPUT_FOCUSED = new RawContextKey<boolean>('swapInputFocussed', false);
-//変更終了
 
 export const ToggleCaseSensitiveKeybinding: IKeybindings = {
 	primary: KeyMod.Alt | KeyCode.KEY_C,
@@ -74,10 +70,8 @@ export const FIND_IDS = {
 	TogglePreserveCaseCommand: 'togglePreserveCase',
 	ReplaceOneAction: 'editor.action.replaceOne',
 	ReplaceAllAction: 'editor.action.replaceAll',
-	SelectAllMatchesAction: 'editor.action.selectAllMatches',
-	//変更開始
-	SwapAllAction: 'editor.action.swapAll'
-	//変更終了
+	SwapAllAction: 'editor.action.swapAll',
+	SelectAllMatchesAction: 'editor.action.selectAllMatches'
 };
 
 export const MATCHES_LIMIT = 19999;
@@ -89,7 +83,6 @@ export class FindModelBoundToEditorModel {
 	private readonly _state: FindReplaceState;
 	private readonly _toDispose = new DisposableStore();
 	private readonly _decorations: FindDecorations;
-	// ↓変更(2021/10/25)
 	private readonly _decorationsForSwap: FindDecorationsForSwap;
 	private _ignoreModelContentChanged: boolean;
 	private readonly _startSearchingTimer: TimeoutTimer;
@@ -104,10 +97,8 @@ export class FindModelBoundToEditorModel {
 		this._startSearchingTimer = new TimeoutTimer();
 
 		this._decorations = new FindDecorations(editor);
-		// ↓変更(2021/10/25)
 		this._decorationsForSwap = new FindDecorationsForSwap(editor);
 		this._toDispose.add(this._decorations);
-		// ↓変更(2021/10/25)
 		this._toDispose.add(this._decorationsForSwap);
 
 		this._updateDecorationsScheduler = new RunOnceScheduler(() => this.research(false), 100);
@@ -156,7 +147,7 @@ export class FindModelBoundToEditorModel {
 			// The find model will be disposed momentarily
 			return;
 		}
-		// ↓変更(2021/10/25 e.swapString)
+
 		if (e.searchString || e.isReplaceRevealed || e.isRegex || e.wholeWord || e.matchCase || e.searchScope || e.swapString) {
 			let model = this._editor.getModel();
 
@@ -219,10 +210,8 @@ export class FindModelBoundToEditorModel {
 
 		let findMatches = this._findMatches(findScopes, false, MATCHES_LIMIT);
 		this._decorations.set(findMatches, findScopes);
-		// 変更開始(2021/10/25)
 		let findMatchesForSwap = this._findMatchesForSwap(findScopes, false, MATCHES_LIMIT);
 		this._decorationsForSwap.set(findMatchesForSwap, findScopes);
-		// 変更終了
 
 		const editorSelection = this._editor.getSelection();
 		let currentMatchesPosition = this._decorations.getCurrentMatchesPosition(editorSelection);
@@ -249,15 +238,7 @@ export class FindModelBoundToEditorModel {
 	}
 
 	private _hasMatchesForSwap(): boolean {
-		const findScopes = this._decorations.getFindScopes();
-		let searchPattern = this._getSearchPattern();
-		let matches = this._findMatchesForSwap(findScopes, searchPattern.hasReplacementPatterns || this._state.preserveCase, Constants.MAX_SAFE_SMALL_INTEGER);
-
-		if (matches.length > 0) {
-			return true;
-		} else {
-			return false;
-		}
+		return (this._decorationsForSwap.getCount() > 0);
 	}
 
 	private _cannotFind(): boolean {
@@ -487,23 +468,19 @@ export class FindModelBoundToEditorModel {
 		return ReplacePattern.fromStaticValue(this._state.replaceString);
 	}
 
-	//変更開始
 	private _getSearchPattern(): ReplacePattern {
 		if (this._state.isRegex) {
 			return parseReplaceString(this._state.searchString);
 		}
 		return ReplacePattern.fromStaticValue(this._state.searchString);
 	}
-	//変更終了
 
-	//変更開始(2021/10/21)
 	private _getSwapPattern(): ReplacePattern {
 		if (this._state.isRegex) {
 			return parseReplaceString(this._state.swapString);
 		}
 		return ReplacePattern.fromStaticValue(this._state.swapString);
 	}
-	//変更終了
 
 	public replace(): void {
 		if (!this._hasMatches()) {
@@ -539,7 +516,6 @@ export class FindModelBoundToEditorModel {
 		return this._editor.getModel().findMatches(this._state.searchString, searchRanges, this._state.isRegex, this._state.matchCase, this._state.wholeWord ? this._editor.getOption(EditorOption.wordSeparators) : null, captureMatches, limitResultCount);
 	}
 
-	//変更開始
 	private _findMatchesForSwap(findScopes: Range[] | null, captureMatches: boolean, limitResultCount: number): FindMatch[] {
 		const searchRanges = (findScopes as [] || [null]).map((scope: Range | null) =>
 			FindModelBoundToEditorModel._getSearchRange(this._editor.getModel(), scope)
@@ -547,7 +523,6 @@ export class FindModelBoundToEditorModel {
 
 		return this._editor.getModel().findMatches(this._state.swapString, searchRanges, false, true, this._state.wholeWordForSwap ? this._editor.getOption(EditorOption.wordSeparators) : null, captureMatches, limitResultCount);
 	}
-	//変更終了
 
 	public replaceAll(): void {
 		if (!this._hasMatches()) {
@@ -619,7 +594,6 @@ export class FindModelBoundToEditorModel {
 		this._executeEditorCommand('replaceAll', command);
 	}
 
-	//変更開始
 	public swapAll(): void {
 		if (this._state.isRegex || !this._state.matchCase) {
 			return;
@@ -632,7 +606,7 @@ export class FindModelBoundToEditorModel {
 
 		if (findScopes === null && this._state.matchesCount >= MATCHES_LIMIT) {
 			// Doing a replace on the entire file that is over ${MATCHES_LIMIT} matches
-			this._largeSwapAll();
+			return;
 		} else {
 			this._regularSwapAll(findScopes);
 		}
@@ -640,53 +614,11 @@ export class FindModelBoundToEditorModel {
 		this.research(false);
 	}
 
-	//変更未完成関数
-	private _largeSwapAll(): void {
-		const searchParams = new SearchParams(this._state.searchString, this._state.isRegex, this._state.matchCase, this._state.wholeWord ? this._editor.getOption(EditorOption.wordSeparators) : null);
-		const searchData = searchParams.parseSearchRequest();
-		if (!searchData) {
-			return;
-		}
-
-		let searchRegex = searchData.regex;
-		if (!searchRegex.multiline) {
-			let mod = 'mu';
-			if (searchRegex.ignoreCase) {
-				mod += 'i';
-			}
-			if (searchRegex.global) {
-				mod += 'g';
-			}
-			searchRegex = new RegExp(searchRegex.source, mod);
-		}
-
-		const model = this._editor.getModel();
-		const modelText = model.getValue(EndOfLinePreference.LF);
-		const fullModelRange = model.getFullModelRange();
-
-		const replacePattern = this._getReplacePattern();
-		let resultText: string;
-		const preserveCase = this._state.preserveCase;
-
-		if (replacePattern.hasReplacementPatterns || preserveCase) {
-			resultText = modelText.replace(searchRegex, function () {
-				return replacePattern.buildReplaceString(<string[]><any>arguments, preserveCase);
-			});
-		} else {
-			resultText = modelText.replace(searchRegex, replacePattern.buildReplaceString(null, preserveCase));
-		}
-
-		let command = new ReplaceCommandThatPreservesSelection(fullModelRange, resultText, this._editor.getSelection());
-		this._executeEditorCommand('replaceAll', command);
-	}
-
 	private _regularSwapAll(findScopes: Range[] | null): void {
 		const swapPattern = this._getSwapPattern();
 		const searchPattern = this._getSearchPattern();
 		// Get all the ranges (even more than the highlighted ones)
 		let matchesForFindInput = this._findMatches(findScopes, swapPattern.hasReplacementPatterns || this._state.preserveCase, Constants.MAX_SAFE_SMALL_INTEGER);
-
-		//swap用に作ったやつ
 		let matchesForSwapInput = this._findMatchesForSwap(findScopes, searchPattern.hasReplacementPatterns || this._state.preserveCase, Constants.MAX_SAFE_SMALL_INTEGER);
 
 		let swapStringsForFindInput: string[] = [];
@@ -699,11 +631,8 @@ export class FindModelBoundToEditorModel {
 			swapStringsForSwapInput[i] = searchPattern.buildReplaceString(matchesForSwapInput[i].matches, this._state.preserveCase);
 		}
 		let command = new SwapAllCommand(this._editor.getSelection(), matchesForFindInput.map(m => m.range), swapStringsForFindInput, matchesForSwapInput.map(m => m.range), swapStringsForSwapInput);
-		// 変更開始
 		this._executeEditorCommand('swapAll', command);
-		// 変更終了
 	}
-	//変更終了
 
 	public selectAllMatches(): void {
 		if (!this._hasMatches()) {

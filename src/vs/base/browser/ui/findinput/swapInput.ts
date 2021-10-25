@@ -67,9 +67,7 @@ export class SwapInput extends Widget {
 	private inputValidationErrorBackground?: Color;
 	private inputValidationErrorForeground?: Color;
 
-	// 変更開始(2021/10/24)
 	private wholeWords: WholeWordsCheckbox;
-	// 変更終了
 	private cachedOptionsWidth: number = 0;
 	public domNode: HTMLElement;
 	public inputBox: HistoryInputBox;
@@ -149,7 +147,7 @@ export class SwapInput extends Widget {
 			flexibleWidth,
 			flexibleMaxHeight
 		}));
-		// 変更開始(2021/10/24)
+
 		this.wholeWords = this._register(new WholeWordsCheckbox({
 			appendTitle: appendWholeWordsLabel,
 			isChecked: false,
@@ -175,7 +173,6 @@ export class SwapInput extends Widget {
 		}
 
 		// Arrow-Key support to navigate between options
-		// ↓変更(2021/10/24)
 		let indexes = [this.wholeWords.domNode];
 		this.onkeydown(this.domNode, (event: IKeyboardEvent) => {
 			if (event.equals(KeyCode.LeftArrow) || event.equals(KeyCode.RightArrow) || event.equals(KeyCode.Escape)) {
@@ -208,9 +205,8 @@ export class SwapInput extends Widget {
 		let controls = document.createElement('div');
 		controls.className = 'controls';
 		controls.style.display = this._showOptionButtons ? 'block' : 'none';
-		// 変更開始(2021/10/24)
 		controls.appendChild(this.wholeWords.domNode);
-		// 変更終了
+
 		this.domNode.appendChild(controls);
 
 		if (parent) {
@@ -226,14 +222,12 @@ export class SwapInput extends Widget {
 	public enable(): void {
 		this.domNode.classList.remove('disabled');
 		this.inputBox.enable();
-		// ↓変更(2021/10/24)
 		this.wholeWords.enable();
 	}
 
 	public disable(): void {
 		this.domNode.classList.add('disabled');
 		this.inputBox.disable();
-		// ↓変更(2021/10/24)
 		this.wholeWords.disable();
 	}
 
@@ -297,7 +291,6 @@ export class SwapInput extends Widget {
 				inputActiveOptionForeground: this.inputActiveOptionForeground,
 				inputActiveOptionBackground: this.inputActiveOptionBackground,
 			};
-			// ↓変更(2021/10/24)
 			this.wholeWords.style(checkBoxStyles);
 
 			const inputBoxStyles: IInputBoxStyles = {
@@ -326,7 +319,6 @@ export class SwapInput extends Widget {
 		this.inputBox.focus();
 	}
 
-	// 変更開始(2021/10/24)
 	public getWholeWords(): boolean {
 		return this.wholeWords.checked;
 	}
@@ -339,7 +331,6 @@ export class SwapInput extends Widget {
 		this.wholeWords.focus();
 	}
 
-	// 変更終了
 	private _lastHighlightFindOptions: number = 0;
 	public highlightFindOptions(): void {
 		this.domNode.classList.remove('highlight-' + (this._lastHighlightFindOptions));
