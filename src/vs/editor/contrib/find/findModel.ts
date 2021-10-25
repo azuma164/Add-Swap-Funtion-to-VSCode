@@ -89,6 +89,8 @@ export class FindModelBoundToEditorModel {
 	private readonly _state: FindReplaceState;
 	private readonly _toDispose = new DisposableStore();
 	private readonly _decorations: FindDecorations;
+	// ↓変更(2021/10/25)
+	private readonly _decorationsForSwap: FindDecorations;
 	private _ignoreModelContentChanged: boolean;
 	private readonly _startSearchingTimer: TimeoutTimer;
 
@@ -102,7 +104,11 @@ export class FindModelBoundToEditorModel {
 		this._startSearchingTimer = new TimeoutTimer();
 
 		this._decorations = new FindDecorations(editor);
+		// ↓変更(2021/10/25)
+		this._decorationsForSwap = new FindDecorations(editor);
 		this._toDispose.add(this._decorations);
+		// ↓変更(2021/10/25)
+		this._toDispose.add(this._decorationsForSwap);
 
 		this._updateDecorationsScheduler = new RunOnceScheduler(() => this.research(false), 100);
 		this._toDispose.add(this._updateDecorationsScheduler);
@@ -150,7 +156,8 @@ export class FindModelBoundToEditorModel {
 			// The find model will be disposed momentarily
 			return;
 		}
-		if (e.searchString || e.isReplaceRevealed || e.isRegex || e.wholeWord || e.matchCase || e.searchScope) {
+		// ↓変更(2021/10/25 e.swapString)
+		if (e.searchString || e.isReplaceRevealed || e.isRegex || e.wholeWord || e.matchCase || e.searchScope || e.swapString) {
 			let model = this._editor.getModel();
 
 			if (model.isTooLargeForSyncing()) {
@@ -212,6 +219,10 @@ export class FindModelBoundToEditorModel {
 
 		let findMatches = this._findMatches(findScopes, false, MATCHES_LIMIT);
 		this._decorations.set(findMatches, findScopes);
+		// 変更開始(2021/10/25)
+		let findMatchesForSwap = this._findMatchesForSwap(findScopes, false, MATCHES_LIMIT);
+		this._decorationsForSwap.set(findMatchesForSwap, findScopes);
+		// 変更終了
 
 		const editorSelection = this._editor.getSelection();
 		let currentMatchesPosition = this._decorations.getCurrentMatchesPosition(editorSelection);
