@@ -270,6 +270,11 @@
 	animation-duration: 0;
 	animation-name: inherit !important;
 }
+.monaco-editor .findMatchForSwap {
+	animation-duration: 0;
+	animation-name: inherit !important;
+}
+
 
 .monaco-editor .find-widget .monaco-sash {
 	left: 0 !important;

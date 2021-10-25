@@ -9,7 +9,7 @@ import { Position } from 'vs/editor/common/core/position';
 import { Range } from 'vs/editor/common/core/range';
 import { FindMatch, IModelDecorationsChangeAccessor, IModelDeltaDecoration, MinimapPosition, OverviewRulerLane, TrackedRangeStickiness } from 'vs/editor/common/model';
 import { ModelDecorationOptions } from 'vs/editor/common/model/textModel';
-import { minimapFindMatch, overviewRulerFindMatchForeground } from 'vs/platform/theme/common/colorRegistry';
+import { minimapFindMatchForSwap,/* overviewRulerFindMatchForeground,*/ overviewRulerFindMatchForegroundForSwap } from 'vs/platform/theme/common/colorRegistry';
 import { themeColorFromId } from 'vs/platform/theme/common/themeService';
 
 export class FindDecorations implements IDisposable {
@@ -146,6 +146,8 @@ export class FindDecorations implements IDisposable {
 		return matchPosition;
 	}
 
+
+
 	public set(findMatches: FindMatch[], findScopes: Range[] | null): void {
 		this._editor.changeDecorations((accessor) => {
 
@@ -218,6 +220,10 @@ export class FindDecorations implements IDisposable {
 		});
 	}
 
+
+
+
+
 	public matchBeforePosition(position: Position): Range | null {
 		if (this._decorations.length === 0) {
 			return null;
@@ -282,11 +288,11 @@ export class FindDecorations implements IDisposable {
 		className: 'currentFindMatch',
 		showIfCollapsed: true,
 		overviewRuler: {
-			color: themeColorFromId(overviewRulerFindMatchForeground),
+			color: themeColorFromId(overviewRulerFindMatchForegroundForSwap),
 			position: OverviewRulerLane.Center
 		},
 		minimap: {
-			color: themeColorFromId(minimapFindMatch),
+			color: themeColorFromId(minimapFindMatchForSwap),
 			position: MinimapPosition.Inline
 		}
 	});
@@ -298,11 +304,11 @@ export class FindDecorations implements IDisposable {
 		className: 'findMatch',
 		showIfCollapsed: true,
 		overviewRuler: {
-			color: themeColorFromId(overviewRulerFindMatchForeground),
+			color: themeColorFromId(overviewRulerFindMatchForegroundForSwap),
 			position: OverviewRulerLane.Center
 		},
 		minimap: {
-			color: themeColorFromId(minimapFindMatch),
+			color: themeColorFromId(minimapFindMatchForSwap),
 			position: MinimapPosition.Inline
 		}
 	});
@@ -318,7 +324,7 @@ export class FindDecorations implements IDisposable {
 		description: 'find-match-only-overview',
 		stickiness: TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
 		overviewRuler: {
-			color: themeColorFromId(overviewRulerFindMatchForeground),
+			color: themeColorFromId(overviewRulerFindMatchForegroundForSwap),
 			position: OverviewRulerLane.Center
 		}
 	});
@@ -326,12 +332,20 @@ export class FindDecorations implements IDisposable {
 	private static readonly _RANGE_HIGHLIGHT_DECORATION = ModelDecorationOptions.register({
 		description: 'find-range-highlight',
 		stickiness: TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+		overviewRuler: {
+			color: themeColorFromId(overviewRulerFindMatchForegroundForSwap),
+			position: OverviewRulerLane.Center
+		},
 		className: 'rangeHighlight',
 		isWholeLine: true
 	});
 
 	private static readonly _FIND_SCOPE_DECORATION = ModelDecorationOptions.register({
 		description: 'find-scope',
+		overviewRuler: {
+			color: themeColorFromId(overviewRulerFindMatchForegroundForSwap),
+			position: OverviewRulerLane.Center
+		},
 		className: 'findScope',
 		isWholeLine: true
 	});
