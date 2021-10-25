@@ -148,7 +148,7 @@ export class FindModelBoundToEditorModel {
 			return;
 		}
 
-		if (e.searchString || e.isReplaceRevealed || e.isRegex || e.wholeWord || e.matchCase || e.searchScope || e.swapString) {
+		if (e.searchString || e.isReplaceRevealed || e.isRegex || e.wholeWord || e.matchCase || e.searchScope || e.swapString || e.wholeWordForSwap) {
 			let model = this._editor.getModel();
 
 			if (model.isTooLargeForSyncing()) {
